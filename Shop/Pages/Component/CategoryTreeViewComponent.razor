@@ -1,0 +1,75 @@
+﻿@using Shop.Data
+@using Shop.Services
+@inherits OwningComponentBase<CategoryService>
+@inject NavigationManager NavigationManager
+
+@foreach (var category in categories)
+{
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary p-2 m-1">
+        @if (Service.GetCategories(category.CategoryId).Count > 0)
+        {
+            <form class="form-inline my-2 my-lg-0 m-2">
+               <button class="btn btn-secondary my-2 my-sm-0" type="submit" @onclick="SwitchExpand">+</button>
+            </form>
+        }
+        else
+        {
+            <form class="form-inline my-2 my-lg-0 m-2">
+                <button class="btn btn-secondary my-2 my-sm-0 disabled">+</button>
+            </form>
+        }
+        <a class="navbar-brand" href="#">@category.CategoryName</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarColor01" aria-controls="navbarColor01" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarColor01">
+
+            <ul class="navbar-nav mr-auto">
+            </ul>
+
+            <form class="form-inline my-2 my-lg-0">
+                <button class="btn btn-secondary my-2 my-sm-0" type="submit">Edit Custom Fields</button>
+                <button class="btn btn-secondary my-2 my-sm-0" type="submit">Edit</button> @*@onclick="(() => EditCategory(category))"*@
+                <button class="btn btn-secondary my-2 my-sm-0" type="submit" @onclick="() => DeleteCategory(category)">Delete</button>
+            </form>
+        </div>
+    </nav>
+    @if (Service.GetCategories(category.CategoryId).Count > 0)
+    {
+        <div class="row">
+            <div class="col-1">
+
+            </div>
+            <div class="col-11">
+                <Shop.Pages.Component.CategoryTreeViewComponent
+                    categories="@Service.GetCategories(category.CategoryId)">
+                </Shop.Pages.Component.CategoryTreeViewComponent>
+            </div>
+        </div>
+    }
+}
+
+@code {
+    bool expand = false;
+    private void SwitchExpand()
+    {
+        expand = !expand;
+    }
+
+    [Parameter]
+    public List<Category> categories { get; set; }
+
+    [Parameter]
+    public EventCallback EditCategory { get; set; }
+
+    //[Parameter]
+    //public EventCallback<Category> DeleteCategory { get; set; }
+
+    private void DeleteCategory(Category category)
+    {
+        Category altCategory = category;
+        Service.DeleteCategory(category);
+        categories = Service.GetCategories();
+    }
+}

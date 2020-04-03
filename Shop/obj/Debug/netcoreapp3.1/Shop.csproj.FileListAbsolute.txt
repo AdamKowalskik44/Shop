@@ -90,3 +90,7 @@ C:\Users\adamk\Documents\c#\PracaDyplomowa\Shop\obj\Debug\netcoreapp3.1\staticwe
 C:\Users\adamk\Documents\c#\PracaDyplomowa\Shop\obj\Debug\netcoreapp3.1\staticwebassets\Shop.StaticWebAssets.xml
 C:\Users\adamk\Documents\c#\PracaDyplomowa\Shop\obj\Debug\netcoreapp3.1\Shop.dll
 C:\Users\adamk\Documents\c#\PracaDyplomowa\Shop\obj\Debug\netcoreapp3.1\Shop.pdb
+C:\Users\adamk\Documents\c#\PracaDyplomowa\Shop\obj\Debug\netcoreapp3.1\RazorDeclaration\Pages\CategoryPage.razor.g.cs
+C:\Users\adamk\Documents\c#\PracaDyplomowa\Shop\obj\Debug\netcoreapp3.1\Razor\Pages\CategoryPage.razor.g.cs
+C:\Users\adamk\Documents\c#\PracaDyplomowa\Shop\obj\Debug\netcoreapp3.1\RazorDeclaration\Pages\Component\CategoryTreeViewComponent.razor.g.cs
+C:\Users\adamk\Documents\c#\PracaDyplomowa\Shop\obj\Debug\netcoreapp3.1\Razor\Pages\Component\CategoryTreeViewComponent.razor.g.cs

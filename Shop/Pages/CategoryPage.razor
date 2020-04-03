@@ -1,0 +1,246 @@
+﻿@page "/category"
+@using Shop.Data
+@using Shop.Services
+@inherits OwningComponentBase<CategoryService>
+@inject NavigationManager NavigationManager
+@* Header + Add New *@
+
+<div class="container">
+    <div class="container p-3">
+        <div class="row">
+            <div class="col-9">
+                <h3 class="text-primary">Category List</h3>
+            </div>
+            <div class="col-3">
+                <button class="btn btn-primary form-control" @onclick="CreateCategory">
+                    Add New Category
+                </button>
+            </div>
+        </div>
+    </div>
+
+    @if (categories == null)
+    {
+        <p><em>Loading or no categories exist</em></p>
+    }
+    else
+    {
+        <div class="custom-control custom-switch">
+            <a style="margin-right:40px">Tree View</a>
+            <input type="checkbox" class="custom-control-input" id="customSwitch1" @onchange="ToggleTreeView" />
+            <label class="custom-control-label" for="customSwitch1">List View</label>
+        </div>
+        if (!showTree)
+        {
+        <div class="container">
+            <Shop.Pages.Component.CategoryTreeViewComponent categories="@Service.GetRootCategories()"></Shop.Pages.Component.CategoryTreeViewComponent>
+        </div>
+        }
+        else
+        {
+            <div class="container border p-3">
+                <div class="row pt-4">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Parent Category</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var category in categories)
+                            {
+                                <tr>
+                                    <td>@category.CategoryName</td>
+                                    @if (Service.GetCategory(category.ParentCategoryId) != null)
+                                    {
+                                        <td>@Service.GetCategory(category.ParentCategoryId).CategoryName</td>
+                                    }
+                                    else
+                                    {
+                                        <td>Root Category</td>
+                                    }
+                                    <td>
+                                        <div class="container">
+                                            <button class="btn btn-primary" style="width:250px">
+                                                Edit Custom Fields
+                                            </button>
+                                            <button class="btn btn-primary" style="width:150px" @onclick="() => EditCategory(category)">
+                                                Edit
+                                            </button>
+                                            <button class="btn btn-danger" style="width:150px" @onclick="() => DeleteCategory(category)">
+                                                Delete
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+    }
+
+    @if (showPopup)
+    {
+        <div class="modal" tabindex="-1" style="display:block" role="dialog">
+            <EditForm Model="@currentCategory" OnValidSubmit="@ValidSubmit">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3 class="text-info">@(currentCategory.CategoryId != 0 ? "Update" : "Create")</h3>
+                            <button type="button" class="close" @onclick="ClosePopup">
+                                <span aria-hidden="true">X</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <DataAnnotationsValidator></DataAnnotationsValidator>
+                            <ValidationSummary></ValidationSummary>
+                            <div class="row">
+                                <div class="col-9">
+                                    <div class="row py-2">
+                                        <div class="col-4">
+                                            Category Name
+                                        </div>
+                                        <div class="col-8">
+                                            <input class="form-control" type="text" @bind="currentCategory.CategoryName" />
+                                        </div>
+                                    </div>
+                                    <div class="row py-2">
+                                        <div class="col-4">
+                                            Parent Category ID
+                                        </div>
+                                        <div class="col-8">
+                                            <select @bind="currentCategory.ParentCategoryId" class="form-control">
+                                                @foreach (var category in categories)
+                                                {
+                                                    <option class="dropdown-item" value="@category.CategoryId" selected="@(category.CategoryId == category.CategoryId ? true : false)">@category.CategoryName</option>
+                                                }
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="row py-2">
+                                        <div class="col-4">
+
+                                        </div>
+                                        <div class="col-8">
+                                            <button class="btn btn-primary form-control" type="submit">Submit</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </EditForm>
+        </div>
+    }
+
+    @if (showPopupWarning)
+        {
+            <div class="modal" tabindex="-1" style="display:block" role="dialog">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3 class="text-primary">@warningMessage</h3>
+                        </div>
+                        <div class="modal-body">
+                            <button class="btn btn-primary" @onclick="ClosePopupWarning">OK</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+</div>
+
+@code {
+
+    List<Category> categories;
+    Category currentCategory;
+    //false = show list, true = show tree
+    bool showTree = false;
+    bool showPopup = false;
+    bool showPopupWarning = false;
+    string warningMessage = "";
+
+    protected override void OnInitialized()
+    {
+        categories = Service.GetCategories();
+    }
+
+    private void CreateCategory()
+    {
+        currentCategory = new Category();
+        currentCategory.CategoryId = 0;
+        showPopup = true;
+    }
+
+    private void EditCategory(Category category)
+    {
+        currentCategory = category;
+        showPopup = true;
+    }
+
+    private void DeleteCategory(Category category)
+    {
+        Service.DeleteCategory(category);
+        categories = Service.GetCategories();
+    }
+
+    private void ClosePopup()
+    {
+        showPopup = false;
+    }
+
+    private void ValidSubmit()
+    {
+        var result = false;
+        showPopup = false;
+        Category parentCategory = Service.GetCategory(currentCategory.ParentCategoryId);
+
+        if (currentCategory.CategoryId != 0 && currentCategory.CategoryId == parentCategory.ParentCategoryId)
+        {
+            ShowPopupWarning("Parent category cannot be children category!");
+        }
+        else
+        {
+            if (currentCategory.CategoryId > 0)
+            {
+                result = Service.UpdateCategory(currentCategory);
+            }
+            else
+            {
+                result = Service.CreateCategory(currentCategory);
+            }
+        }
+
+        categories = Service.GetCategories();
+    }
+
+    private void ParentCategorySelectionChanged(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value.ToString(), out int id))
+        {
+            currentCategory.ParentCategoryId = id;
+        }
+    }
+
+    private void ToggleTreeView()
+    {
+        showTree = !showTree;
+    }
+
+    private void ShowPopupWarning(string message)
+    {
+        showPopupWarning = true;
+        warningMessage = message;
+    }
+
+    private void ClosePopupWarning()
+    {
+        showPopupWarning = false;
+        warningMessage = "";
+    }
+}

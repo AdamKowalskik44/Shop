@@ -1,0 +1,2 @@
+﻿- Poprawić widok drzewa kategorii
+- Dodać modele:

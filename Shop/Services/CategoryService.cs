@@ -20,6 +20,34 @@ namespace Shop.Services
             return _db.Categories.ToList();
         }
 
+        public List<Category> GetCategories(int parentCategoryId)
+        {
+            List<Category> categories = _db.Categories.ToList();
+            List<Category> result = new List<Category>();
+            foreach (var item in categories)
+            {
+                if (item.ParentCategoryId != 0 && item.ParentCategoryId == parentCategoryId)
+                {
+                    result.Add(item);
+                }
+            }
+            return result;
+        }
+
+        public List<Category> GetRootCategories()
+        {
+            List<Category> categories = _db.Categories.ToList();
+            List<Category> result = new List<Category>();
+            foreach (var item in categories)
+            {
+                if (GetCategory(item.ParentCategoryId) == null)
+                {
+                    result.Add(item);
+                }
+            }
+            return result;
+        }
+
         public Category GetCategory(int categoryId)
         {
             Category category = new Category();
@@ -41,6 +69,42 @@ namespace Shop.Services
             return true;
         }
 
-        //TODO CreateCategory, DeleteCategory
+        public bool DeleteCategory(Category category)
+        {
+            if(_db.Categories.Contains(category))
+            {
+                _db.Categories.Remove(category);
+                //async?
+                _db.SaveChanges();
+            }
+            else
+            {
+                return false;
+            }
+            return true;
+        }
+        
+        public bool UpdateCategory(Category category)
+        {
+            try
+            {
+                var existingCategory = _db.Categories.FirstOrDefault(u => u.CategoryId == category.CategoryId);
+                if (existingCategory != null)
+                {
+                    existingCategory.CategoryName = category.CategoryName;
+                    existingCategory.ParentCategoryId = category.ParentCategoryId;
+                    _db.SaveChanges();
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+            return true;
+        }
     }
 }
