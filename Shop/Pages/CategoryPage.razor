@@ -1,10 +1,11 @@
 ﻿@page "/category"
+@page "/category/{Parameter1}"
 @using Shop.Data
 @using Shop.Services
 @inherits OwningComponentBase<CategoryService>
 @inject NavigationManager NavigationManager
-@* Header + Add New *@
 
+@* Header + Add New *@
 <div class="container">
     <div class="container p-3">
         <div class="row">
@@ -27,10 +28,10 @@
     {
         <div class="custom-control custom-switch">
             <a style="margin-right:40px">Tree View</a>
-            <input type="checkbox" class="custom-control-input" id="customSwitch1" @onchange="ToggleTreeView" />
+            <input type="checkbox" class="custom-control-input" id="customSwitch1" />
             <label class="custom-control-label" for="customSwitch1">List View</label>
         </div>
-        if (!showTree)
+        if (showTree)
         {
         <div class="container">
             <Shop.Pages.Component.CategoryTreeViewComponent categories="@Service.GetRootCategories()"></Shop.Pages.Component.CategoryTreeViewComponent>
@@ -63,7 +64,7 @@
                                     }
                                     <td>
                                         <div class="container">
-                                            <button class="btn btn-primary" style="width:250px">
+                                            <button class="btn btn-primary" style="width:250px" @onclick="() => NavigateToCustomField(category)">
                                                 Edit Custom Fields
                                             </button>
                                             <button class="btn btn-primary" style="width:150px" @onclick="() => EditCategory(category)">
@@ -157,8 +158,25 @@
 
 @code {
 
+    [Parameter]
+    public string Parameter1
+    {
+        set
+        {
+            if (int.TryParse(value, out int result))
+            {
+                Category category = Service.GetCategory(result);
+                if (category != null)
+                {
+                    EditCategory(category);
+                }
+            }
+        }
+    }
+
     List<Category> categories;
     Category currentCategory;
+
     //false = show list, true = show tree
     bool showTree = false;
     bool showPopup = false;
@@ -242,5 +260,10 @@
     {
         showPopupWarning = false;
         warningMessage = "";
+    }
+
+    private void NavigateToCustomField(Category category)
+    {
+        NavigationManager.NavigateTo("/CustomField/" + category.CategoryId);
     }
 }

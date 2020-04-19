@@ -14,5 +14,7 @@ namespace Shop.Data
         }
 
         public DbSet<Category> Categories { get; set; }
+        public DbSet<CustomField> CustomFields { get; set; }
+        public DbSet<DropDownItem> DropDownItems { get; set; }
     }
 }

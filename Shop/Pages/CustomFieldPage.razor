@@ -1,0 +1,203 @@
+﻿@page "/CustomField/{Parameter1}"
+@page "/CustomField"
+@using Shop.Data;
+@using Shop.Services;
+@using Shop.Pages;
+@inherits OwningComponentBase<CustomFieldService>
+@inject NavigationManager NavigationManager
+
+<div class="container">
+    <div class="container p-3">
+        <div class="row">
+            <div class="col-6">
+                <h3 class="text-primary">@(category == null ? "All Custom Fields" : "Custom Fields of Category " + category.CategoryName)</h3>
+            </div>
+            <div class="container col-6">
+                <button class="btn btn-primary float-right" style="width:250px" @onclick="CreateCustomField">
+                    Add New Custom Field
+                </button>
+                @if (category != null)
+                {
+                    <button class="btn btn-primary float-right" style="width:250px; margin-right:4px" @onclick="() => NavigateToCategory(category.CategoryId)">
+                        Show Category
+                    </button>
+                }
+            </div>
+
+        </div>
+    </div>
+
+    @if (customFields == null)
+    {
+        <p><em>Loading or no customFields exist</em></p>
+    }
+    else
+    {
+        <div class="container border p-3">
+            <div class="row pt-4">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            @if (category == null)
+                            {
+                                <th>Category</th>
+                            }
+                            <th>Field Type</th>
+                            <th>Arguments</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var customField in customFields)
+                        {
+                            <tr>
+                                <td>@customField.CustomFieldName</td>
+                                @if (category == null)
+                                {
+                                    <td>@(Service.GetCategory(customField.CategoryId).CategoryName)</td>
+                                }
+                                <td>@customField.FieldType</td>
+                                <td>TODO</td>
+                                <td>
+                                    <div class="container">
+                                        @if (category == null)
+                                        {
+                                            <button class="btn btn-primary" style="width:200px" @onclick="() => NavigateToCategory(customField.CategoryId)">
+                                                Show Category
+                                            </button>
+                                        }
+                                        <button class="btn btn-primary" style="width:150px" @onclick="() => EditCustomField(customField)">
+                                            Edit
+                                        </button>
+                                        <button class="btn btn-danger" style="width:150px" @onclick="() => DeleteCustomField(customField)">
+                                            Delete
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+    @if (showPopup)
+    {
+        <Shop.Pages.Component.DropDownItemComponent CurrentCustomField="@currentCustomField"
+                                                    Close="ClosePopup"
+                                                    Submit="ValidSubmit"
+                                                    Categories="categories">
+        </Shop.Pages.Component.DropDownItemComponent>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public string Parameter1
+    {
+        /* get
+        {
+            return _categoryId.ToString();
+        } */
+        set
+        {
+            if (int.TryParse(value, out int result))
+            {
+                _categoryId = result;
+            }
+            else
+            {
+                _categoryId = null;
+            }
+        }
+    }
+    private int? _categoryId;
+    private Category category;
+    private CustomField currentCustomField;
+    private List<CustomField> customFields;
+    private List<Category> categories;
+    private bool showPopup = false;
+
+    protected override void OnInitialized()
+    {
+        LoadCustomFields();
+    }
+
+    private void CreateCustomField()
+    {
+        currentCustomField = new CustomField();
+        currentCustomField.CustomFieldId = 0;
+        if (_categoryId != null)
+        {
+            currentCustomField.CategoryId = int.Parse(_categoryId.ToString());
+        }
+        ShowPopup();
+    }
+
+    private void EditCustomField(CustomField customField)
+    {
+        currentCustomField = customField;
+        ShowPopup();
+    }
+
+    private void DeleteCustomField(CustomField customField)
+    {
+        var result = false;
+        result = Service.DeleteCustomField(customField);
+        LoadCustomFields();
+    }
+
+    private void ValidSubmit(CustomField customField)
+    {
+        var result = false;
+        showPopup = false;
+
+        if (currentCustomField.CustomFieldId > 0)
+        {
+            result = Service.UpdateCustomField(customField);
+        }
+        else
+        {
+            result = Service.CreateCustomField(customField);
+        }
+
+        LoadCustomFields();
+    }
+
+    private void ShowPopup()
+    {
+        categories = Service.GetCategories();
+        showPopup = true;
+    }
+
+    private void ClosePopup()
+    {
+        showPopup = false;
+    }
+
+    private void LoadCustomFields()
+    {
+        if (_categoryId != null)
+        {
+            category = Service.GetCategory(int.Parse(_categoryId.ToString()));
+            if (category != null)
+            {
+                customFields = Service.GetCustomFields(category.CategoryId);
+            }
+            else
+            {
+                customFields = Service.GetCustomFields();
+            }
+        }
+        else
+        {
+            customFields = Service.GetCustomFields();
+        }
+    }
+
+    private void NavigateToCategory(int categoryId)
+    {
+        NavigationManager.NavigateTo("/category/" + categoryId);
+    }
+}

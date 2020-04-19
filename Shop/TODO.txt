@@ -1,2 +1,1 @@
-﻿- Poprawić widok drzewa kategorii
-- Dodać modele:
+﻿poprawić treeview component

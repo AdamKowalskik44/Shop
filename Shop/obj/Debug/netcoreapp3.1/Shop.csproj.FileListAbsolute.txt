@@ -94,3 +94,7 @@ C:\Users\adamk\Documents\c#\PracaDyplomowa\Shop\obj\Debug\netcoreapp3.1\RazorDec
 C:\Users\adamk\Documents\c#\PracaDyplomowa\Shop\obj\Debug\netcoreapp3.1\Razor\Pages\CategoryPage.razor.g.cs
 C:\Users\adamk\Documents\c#\PracaDyplomowa\Shop\obj\Debug\netcoreapp3.1\RazorDeclaration\Pages\Component\CategoryTreeViewComponent.razor.g.cs
 C:\Users\adamk\Documents\c#\PracaDyplomowa\Shop\obj\Debug\netcoreapp3.1\Razor\Pages\Component\CategoryTreeViewComponent.razor.g.cs
+C:\Users\adamk\Documents\c#\PracaDyplomowa\Shop\obj\Debug\netcoreapp3.1\RazorDeclaration\Pages\CustomFieldPage.razor.g.cs
+C:\Users\adamk\Documents\c#\PracaDyplomowa\Shop\obj\Debug\netcoreapp3.1\Razor\Pages\CustomFieldPage.razor.g.cs
+C:\Users\adamk\Documents\c#\PracaDyplomowa\Shop\obj\Debug\netcoreapp3.1\RazorDeclaration\Pages\Component\DropDownItemComponent.razor.g.cs
+C:\Users\adamk\Documents\c#\PracaDyplomowa\Shop\obj\Debug\netcoreapp3.1\Razor\Pages\Component\DropDownItemComponent.razor.g.cs

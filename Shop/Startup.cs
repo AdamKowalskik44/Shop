@@ -41,6 +41,8 @@ namespace Shop
             services.AddServerSideBlazor();
             services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<IdentityUser>>();
             services.AddScoped<CategoryService>();
+            services.AddScoped<CustomFieldService>();
+            services.AddScoped<DropDownItemService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
