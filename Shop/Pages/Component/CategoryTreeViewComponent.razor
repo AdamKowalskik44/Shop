@@ -1,76 +1,71 @@
 ﻿@using Shop.Data
 @using Shop.Services
-@using Shop.Pages
 @inherits OwningComponentBase<CategoryService>
 @inject NavigationManager NavigationManager
 
-@foreach (var category in categories)
+@foreach (var category in Categories)
 {
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary p-2 m-1">
-        @if (Service.GetCategories(category.CategoryId).Count > 0)
-        {
-            <form class="form-inline my-2 my-lg-0 m-2">
-               <button class="btn btn-secondary my-2 my-sm-0" type="submit" @onclick="SwitchExpand">+</button>
-            </form>
-        }
-        else
-        {
-            <form class="form-inline my-2 my-lg-0 m-2">
-                <button class="btn btn-secondary my-2 my-sm-0 disabled">+</button>
-            </form>
-        }
-        <a class="navbar-brand" href="#">@category.CategoryName</a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarColor01" aria-controls="navbarColor01" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-
-        <div class="collapse navbar-collapse" id="navbarColor01">
-
-            <ul class="navbar-nav mr-auto">
-            </ul>
-
-            <form class="form-inline my-2 my-lg-0">
-                <button class="btn btn-secondary my-2 my-sm-0" type="submit">Edit Custom Fields</button>
-                <button class="btn btn-secondary my-2 my-sm-0" type="submit">Edit</button> @*@onclick="(() => EditCategory(category))"*@
-                <button class="btn btn-secondary my-2 my-sm-0" type="submit" @onclick="() => DeleteCategory(category)">Delete</button>
-            </form>
+    <li>
+        <div class="container">
+            <div class="row m-1">
+                <div>
+                    <h6>@category.CategoryName</h6>
+                </div>
+                <div class="col-8">
+                    <div class="container">
+                        <button class="btn btn-primary" style="width:150px" @onclick="() => NavigateToCustomField(category)">
+                            Custom Fields
+                        </button>
+                        <button class="btn btn-primary" style="width:100px" @onclick="() => EditCategory(category)">
+                            Edit
+                        </button>
+                        <button class="btn btn-danger" style="width:100px" @onclick="() => DeleteCategory(category.CategoryId)">
+                            Delete
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
-    </nav>
+    </li>
     @if (Service.GetCategories(category.CategoryId).Count > 0)
     {
-        <div class="row">
-            <div class="col-1">
-
-            </div>
-            <div class="col-11">
-                <Shop.Pages.Component.CategoryTreeViewComponent
-                    categories="@Service.GetCategories(category.CategoryId)">
-                </Shop.Pages.Component.CategoryTreeViewComponent>
-            </div>
-        </div>
+        <ul class="nested">
+            <Shop.Pages.Component.CategoryTreeViewComponent 
+                Categories="@Service.GetCategories(category.CategoryId)"
+                NavigateToCustomFieldCallback="NavigateToCustomField"
+                EditCategoryCallback="EditCategory"
+                DeleteCategoryCallback="DeleteCategory">
+            </Shop.Pages.Component.CategoryTreeViewComponent>
+        </ul>
     }
 }
 
 @code {
-    bool expand = false;
-    private void SwitchExpand()
+    [Parameter]
+    public List<Category> Categories { get; set; }
+
+    [Parameter]
+    public EventCallback<Category> NavigateToCustomFieldCallback { get; set; }
+
+    [Parameter]
+    public EventCallback<Category> EditCategoryCallback { get; set; }
+
+    [Parameter]
+    public EventCallback<int> DeleteCategoryCallback { get; set; }
+
+    private void NavigateToCustomField(Category category)
     {
-        expand = !expand;
+        NavigateToCustomFieldCallback.InvokeAsync(category);
     }
 
-    [Parameter]
-    public List<Category> categories { get; set; }
-
-    [Parameter]
-    public EventCallback EditCategory { get; set; }
-
-    //[Parameter]
-    //public EventCallback<Category> DeleteCategory { get; set; }
-
-    private void DeleteCategory(Category category)
+    private void EditCategory(Category category)
     {
-        Category altCategory = category;
-        Service.DeleteCategory(category);
-        categories = Service.GetCategories();
+        EditCategoryCallback.InvokeAsync(category);
+    }
+
+    private void DeleteCategory(int categoryId)
+    {
+        //Categories.Remove(category);
+        DeleteCategoryCallback.InvokeAsync(categoryId);
     }
 }

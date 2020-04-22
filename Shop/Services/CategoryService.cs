@@ -83,7 +83,23 @@ namespace Shop.Services
             }
             return true;
         }
-        
+
+        public bool DeleteCategory(int categoryId)
+        {
+            Category category = GetCategory(categoryId);
+            if (_db.Categories.Contains(category))
+            {
+                _db.Categories.Remove(category);
+                //async?
+                _db.SaveChanges();
+            }
+            else
+            {
+                return false;
+            }
+            return true;
+        }
+
         public bool UpdateCategory(Category category)
         {
             try

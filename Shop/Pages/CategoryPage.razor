@@ -27,15 +27,21 @@
     else
     {
         <div class="custom-control custom-switch">
-            <a style="margin-right:40px">Tree View</a>
-            <input type="checkbox" class="custom-control-input" id="customSwitch1" />
-            <label class="custom-control-label" for="customSwitch1">List View</label>
+            <a style="margin-right:40px">List View</a>
+            <input type="checkbox" class="custom-control-input" id="customSwitch1" @onclick="ToggleTreeView" />
+            <label class="custom-control-label" for="customSwitch1">Tree View</label>
+            <br>
         </div>
         if (showTree)
         {
-        <div class="container">
-            <Shop.Pages.Component.CategoryTreeViewComponent categories="@Service.GetRootCategories()"></Shop.Pages.Component.CategoryTreeViewComponent>
-        </div>
+            <ul>
+                <Shop.Pages.Component.CategoryTreeViewComponent 
+                    Categories="@Service.GetRootCategories()"
+                    NavigateToCustomFieldCallback="NavigateToCustomField"
+                    EditCategoryCallback="EditCategory"
+                    DeleteCategoryCallback="DeleteCategory">
+                </Shop.Pages.Component.CategoryTreeViewComponent>
+            </ul>
         }
         else
         {
@@ -64,13 +70,13 @@
                                     }
                                     <td>
                                         <div class="container">
-                                            <button class="btn btn-primary" style="width:250px" @onclick="() => NavigateToCustomField(category)">
-                                                Edit Custom Fields
+                                            <button class="btn btn-primary" style="width:200px" @onclick="() => NavigateToCustomField(category)">
+                                                Custom Fields
                                             </button>
-                                            <button class="btn btn-primary" style="width:150px" @onclick="() => EditCategory(category)">
+                                            <button class="btn btn-primary" style="width:100px" @onclick="() => EditCategory(category)">
                                                 Edit
                                             </button>
-                                            <button class="btn btn-danger" style="width:150px" @onclick="() => DeleteCategory(category)">
+                                            <button class="btn btn-danger" style="width:100px" @onclick="() => DeleteCategory(category)">
                                                 Delete
                                             </button>
                                         </div>
@@ -86,57 +92,12 @@
 
     @if (showPopup)
     {
-        <div class="modal" tabindex="-1" style="display:block" role="dialog">
-            <EditForm Model="@currentCategory" OnValidSubmit="@ValidSubmit">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h3 class="text-info">@(currentCategory.CategoryId != 0 ? "Update" : "Create")</h3>
-                            <button type="button" class="close" @onclick="ClosePopup">
-                                <span aria-hidden="true">X</span>
-                            </button>
-                        </div>
-                        <div class="modal-body">
-                            <DataAnnotationsValidator></DataAnnotationsValidator>
-                            <ValidationSummary></ValidationSummary>
-                            <div class="row">
-                                <div class="col-9">
-                                    <div class="row py-2">
-                                        <div class="col-4">
-                                            Category Name
-                                        </div>
-                                        <div class="col-8">
-                                            <input class="form-control" type="text" @bind="currentCategory.CategoryName" />
-                                        </div>
-                                    </div>
-                                    <div class="row py-2">
-                                        <div class="col-4">
-                                            Parent Category ID
-                                        </div>
-                                        <div class="col-8">
-                                            <select @bind="currentCategory.ParentCategoryId" class="form-control">
-                                                @foreach (var category in categories)
-                                                {
-                                                    <option class="dropdown-item" value="@category.CategoryId" selected="@(category.CategoryId == category.CategoryId ? true : false)">@category.CategoryName</option>
-                                                }
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="row py-2">
-                                        <div class="col-4">
-
-                                        </div>
-                                        <div class="col-8">
-                                            <button class="btn btn-primary form-control" type="submit">Submit</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </EditForm>
-        </div>
+        <Shop.Pages.Component.CategoryComponent 
+            CurrentCategory="@currentCategory"
+            Categories="@categories"
+            ValidSubmit="ValidSubmit"
+            ClosePopup="ClosePopup">
+        </Shop.Pages.Component.CategoryComponent>
     }
 
     @if (showPopupWarning)
@@ -203,7 +164,15 @@
 
     private void DeleteCategory(Category category)
     {
+        categories.Remove(category);
         Service.DeleteCategory(category);
+        categories = Service.GetCategories();
+    }
+
+    private void DeleteCategory(int categoryId)
+    {
+        //categories.Remove(category);
+        Service.DeleteCategory(categoryId);
         categories = Service.GetCategories();
     }
 
@@ -220,7 +189,7 @@
 
         if (currentCategory.CategoryId != 0 && currentCategory.CategoryId == parentCategory.ParentCategoryId)
         {
-            ShowPopupWarning("Parent category cannot be children category!");
+            ShowPopupWarning("Category cannot have it's parent category set as itself, and category cannot be child of category that is already child of itself");
         }
         else
         {
