@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Shop.Data
+namespace Shop.Data.CustomFieldTypes
 {
     public class CustomField
     {
@@ -15,13 +15,27 @@ namespace Shop.Data
         [Required]
         public string CustomFieldName { get; set; }
 
-        public int CategoryId { get; set; }
+        public int CategoryId 
+        { 
+            get
+            {
+                return int.Parse(_categoryId.ToString());
+            }
+            set
+            {
+                _categoryId = value;
+            }
+        }
 
-        [ForeignKey("CategoryId")]
+        private int? _categoryId;
+
+        [ForeignKey("_categoryId")]
         public virtual Category Category { get; set; }
 
         [Required]
         public CustomFieldType FieldType { get; set; }
+
+        
 
         //[NotMapped]
         //public List<string> DropDownArgs 

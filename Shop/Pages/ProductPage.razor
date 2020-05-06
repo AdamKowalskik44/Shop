@@ -1,0 +1,168 @@
+﻿@page "/Product"
+@page "/Product/{ProductId}"
+@page "/Product/{ProductId}/{CategoryId}"
+@using Shop.Data.Product
+@using Shop.Services
+@using Shop.Data.CustomFieldTypes
+@using Shop.Data
+@inherits OwningComponentBase<ProductService>
+
+<h3>Product Page</h3>
+
+@if (productDTO == null)
+{
+    <h3>Product not found</h3>
+}
+else
+{
+    <EditForm Model="@productDTO" OnValidSubmit="@ValidSubmit">
+        <ValidationSummary></ValidationSummary>
+        <div class="container">
+            <div class="row m-1">
+                <div class="col-3">
+                    Product
+                </div>
+                <div class="col-4">
+                    <input class="form-control" type="text" @bind="@productDTO.Product.ProductName" />
+                </div>
+                <div class="col-4">
+                    @productDTO.Product.ProductName
+                </div>
+            </div>
+            <div class="row m-1">
+                <div class="col-3">
+                    Category
+                </div>
+                <div class="col-4">
+                    @foreach (var category in productDTO.CategoryPath)
+                    {
+                        <label>\ @category</label>
+                    }
+                </div>
+                <div class="col-4">
+                    <a>@productDTO.Product.CategoryId</a>
+                </div>
+            </div>
+            <div class="row m-1">
+                <div class="col-3">
+                    Description
+                </div>
+                <div class="col-4">
+                    <textarea class="form-control textarea" type="text" rows="8" @bind="@productDTO.Product.ProducDescription" />
+                </div>
+                <div class="col-4">
+                    @productDTO.Product.ProducDescription
+                </div>
+            </div>
+            @foreach (var item in productDTO.Fields)
+            {
+                <div class="row m-1">
+                    <div class="col-3">
+                        @item.Key.CustomFieldName
+                    </div>
+                    <div class="col-4">
+                        @switch (item.Value)
+                        {
+                            case ProductFieldValueBool productFieldValue:
+                                {
+                                    <div class="form-group">
+                                        <div class="custom-control custom-checkbox">
+                                            <input type="checkbox" class="custom-control-input" id="customCheck1" @bind="productFieldValue.Value">
+                                            <label class="custom-control-label" for="customCheck1">Check this custom checkbox</label>
+                                        </div>
+                                    </div>
+                            }
+                            break;
+                            case ProductFieldValueInt productFieldValue:
+                            <input class="form-control" type="text" @bind="@productFieldValue.Value" />
+                            break;
+                            case ProductFieldValueFloat productFieldValue:
+                            <input class="form-control" type="text" @bind="@productFieldValue.Value" />
+                            break;
+                            case ProductFieldValueString productFieldValue:
+                            <input class="form-control" type="text" @bind="@productFieldValue.Value" />
+                            break;
+                            case ProductFieldValueDDI productFieldValue:
+                            <select @bind="productFieldValue.Value" class="form-control">
+                                @if (true)
+                                {
+                                    CustomFieldDTO customFieldDto = (CustomFieldDTO)item.Key;
+                                    foreach (var dropDownItem in customFieldDto.DropDownItems)
+                                    {
+                                        <option class="dropdown-item" value="@dropDownItem.DropDownItemName">@dropDownItem.DropDownItemName</option>
+                                    }
+                                }
+                            </select>
+                            break;
+                            }
+                        </div>
+                    <div class="col-4">
+                        @switch (item.Value)
+                        {
+                            case ProductFieldValueBool productFieldValue:
+                                <a>@productFieldValue.Value</a>
+                                break;
+                            case ProductFieldValueInt productFieldValue:
+                                <a>@productFieldValue.Value</a>
+                                break;
+                            case ProductFieldValueFloat productFieldValue:
+                                <a>@productFieldValue.Value</a>
+                                break;
+                            case ProductFieldValueString productFieldValue:
+                                <a>@productFieldValue.Value</a>
+                                break;
+                            case ProductFieldValueDDI productFieldValue:
+                                <a>@productFieldValue.Value</a>
+                                break;
+                        }
+                    </div>
+                </div>
+            }
+            <div class="col-12">
+                <button class="btn btn-primary form-control" type="submit">Submit</button>
+            </div>
+        </div>
+    </EditForm>
+}
+
+
+@code {
+    [Parameter]
+    public string ProductId { get; set; }
+
+    [Parameter]
+    public string CategoryId { get; set; }
+
+    private ProductDTO productDTO;
+
+    protected override void OnInitialized()
+    {
+        if (int.TryParse(ProductId, out int productId))
+        {
+            if (productId == 0)
+            {
+                if (int.TryParse(CategoryId, out int categoryId))
+                {
+                    productDTO = Service.GetNewProductDTO(categoryId);
+                }
+            }
+            else
+            {
+                productDTO = Service.GetProductDTO(productId);
+            }
+        }
+    }
+
+    private void ValidSubmit()
+    {
+        bool result;
+        if (productDTO.Product.ProductId > 0)
+        {
+            result = Service.UpdateProduct(productDTO);
+        }
+        else
+        {
+            result = Service.CreateProduct(productDTO);
+        }
+    }
+    }

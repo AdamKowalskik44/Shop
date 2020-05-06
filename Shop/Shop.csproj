@@ -13,6 +13,21 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Remove="Data\Migrations\20200427184356_product.cs" />
+    <Compile Remove="Data\Migrations\20200427184356_product.Designer.cs" />
+    <Compile Remove="Data\Migrations\20200427185142_product.cs" />
+    <Compile Remove="Data\Migrations\20200427185142_product.Designer.cs" />
+    <Compile Remove="Data\Migrations\20200427185804_productFieldValue.cs" />
+    <Compile Remove="Data\Migrations\20200427185804_productFieldValue.Designer.cs" />
+    <Compile Remove="Data\Migrations\20200427191333_productFieldValue.cs" />
+    <Compile Remove="Data\Migrations\20200427191333_productFieldValue.Designer.cs" />
+    <Compile Remove="Data\Migrations\20200427191457_productFieldValue.cs" />
+    <Compile Remove="Data\Migrations\20200427191457_productFieldValue.Designer.cs" />
+    <Compile Remove="Data\Migrations\20200427194946_addProductFieldValue.cs" />
+    <Compile Remove="Data\Migrations\20200427194946_addProductFieldValue.Designer.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="3.1.2" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="3.1.2" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="3.1.2" />

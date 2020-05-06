@@ -43,6 +43,7 @@ namespace Shop
             services.AddScoped<CategoryService>();
             services.AddScoped<CustomFieldService>();
             services.AddScoped<DropDownItemService>();
+            services.AddScoped<ProductService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

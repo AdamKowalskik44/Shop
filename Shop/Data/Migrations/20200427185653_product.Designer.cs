@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Shop.Data;
 
 namespace Shop.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20200427185653_product")]
+    partial class product
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -255,12 +257,9 @@ namespace Shop.Data.Migrations
                     b.Property<int>("FieldType")
                         .HasColumnType("int");
 
-                    b.Property<int?>("_categoryId")
-                        .HasColumnType("int");
-
                     b.HasKey("CustomFieldId");
 
-                    b.HasIndex("_categoryId");
+                    b.HasIndex("CategoryId");
 
                     b.ToTable("CustomFields");
                 });
@@ -309,89 +308,6 @@ namespace Shop.Data.Migrations
                     b.HasIndex("CategoryId");
 
                     b.ToTable("Products");
-                });
-
-            modelBuilder.Entity("Shop.Data.Product.ProductFieldValue", b =>
-                {
-                    b.Property<int>("ProductFieldValueId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<int>("CustomFieldId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Discriminator")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("ProductId")
-                        .HasColumnType("int");
-
-                    b.HasKey("ProductFieldValueId");
-
-                    b.HasIndex("CustomFieldId");
-
-                    b.HasIndex("ProductId");
-
-                    b.ToTable("ProductFieldValues");
-
-                    b.HasDiscriminator<string>("Discriminator").HasValue("ProductFieldValue");
-                });
-
-            modelBuilder.Entity("Shop.Data.Product.ProductFieldValueBool", b =>
-                {
-                    b.HasBaseType("Shop.Data.Product.ProductFieldValue");
-
-                    b.Property<bool>("Value")
-                        .HasColumnType("bit");
-
-                    b.HasDiscriminator().HasValue("ProductFieldValueBool");
-                });
-
-            modelBuilder.Entity("Shop.Data.Product.ProductFieldValueDDI", b =>
-                {
-                    b.HasBaseType("Shop.Data.Product.ProductFieldValue");
-
-                    b.Property<string>("Value")
-                        .HasColumnName("ProductFieldValueDDI_Value")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasDiscriminator().HasValue("ProductFieldValueDDI");
-                });
-
-            modelBuilder.Entity("Shop.Data.Product.ProductFieldValueFloat", b =>
-                {
-                    b.HasBaseType("Shop.Data.Product.ProductFieldValue");
-
-                    b.Property<float>("Value")
-                        .HasColumnName("ProductFieldValueFloat_Value")
-                        .HasColumnType("real");
-
-                    b.HasDiscriminator().HasValue("ProductFieldValueFloat");
-                });
-
-            modelBuilder.Entity("Shop.Data.Product.ProductFieldValueInt", b =>
-                {
-                    b.HasBaseType("Shop.Data.Product.ProductFieldValue");
-
-                    b.Property<int>("Value")
-                        .HasColumnName("ProductFieldValueInt_Value")
-                        .HasColumnType("int");
-
-                    b.HasDiscriminator().HasValue("ProductFieldValueInt");
-                });
-
-            modelBuilder.Entity("Shop.Data.Product.ProductFieldValueString", b =>
-                {
-                    b.HasBaseType("Shop.Data.Product.ProductFieldValue");
-
-                    b.Property<string>("Value")
-                        .IsRequired()
-                        .HasColumnName("ProductFieldValueString_Value")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasDiscriminator().HasValue("ProductFieldValueString");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -449,7 +365,9 @@ namespace Shop.Data.Migrations
                 {
                     b.HasOne("Shop.Data.Category", "Category")
                         .WithMany()
-                        .HasForeignKey("_categoryId");
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Shop.Data.DropDownItem", b =>
@@ -466,21 +384,6 @@ namespace Shop.Data.Migrations
                     b.HasOne("Shop.Data.Category", "Category")
                         .WithMany()
                         .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Shop.Data.Product.ProductFieldValue", b =>
-                {
-                    b.HasOne("Shop.Data.CustomField", "CustomField")
-                        .WithMany()
-                        .HasForeignKey("CustomFieldId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Shop.Data.Product.Product", "Product")
-                        .WithMany()
-                        .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

@@ -6,20 +6,21 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Shop.Data
+namespace Shop.Data.Product
 {
-    public class DropDownItem
+    public class ProductFieldValue : IProductFieldValue
     {
         [Key]
-        public int DropDownItemId { get; set; }
+        public int ProductFieldValueId { get; set; }
 
-        [Required]
-        public string DropDownItemName { get; set; }
-
-        [Required]
         public int CustomFieldId { get; set; }
 
         [ForeignKey("CustomFieldId")]
         public virtual CustomField CustomField { get; set; }
+
+        public int ProductId { get; set; }
+
+        [ForeignKey("ProductId")]
+        public virtual Product Product { get; set; }
     }
 }

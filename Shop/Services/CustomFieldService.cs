@@ -1,4 +1,6 @@
 ﻿using Shop.Data;
+using Shop.Data.CustomFieldTypes;
+using Shop.Data.Product;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -84,10 +86,23 @@ namespace Shop.Services
                 var existingCustomField = _db.CustomFields.FirstOrDefault(u => u.CustomFieldId == customField.CustomFieldId);
                 if (existingCustomField != null)
                 {
+                    if (existingCustomField.FieldType != customField.FieldType)
+                    {
+                        //Delete all productFieldValues whern type was changed
+                        List<ProductFieldValue> productFieldValues = _db.ProductFieldValues.ToList();
+                        foreach (var productFieldValue in productFieldValues)
+                        {
+                            if (productFieldValue.CustomFieldId == existingCustomField.CustomFieldId)
+                            {
+                                productFieldValues.Remove(productFieldValue);
+                            }
+                        }
+                    }
                     existingCustomField.CustomFieldName = customField.CustomFieldName;
                     existingCustomField.CategoryId = customField.CategoryId;
                     existingCustomField.Category = customField.Category;
                     existingCustomField.FieldType = customField.FieldType;
+                    
                     _db.SaveChanges();
                 }
                 else

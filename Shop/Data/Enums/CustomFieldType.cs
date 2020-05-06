@@ -10,6 +10,7 @@ namespace Shop.Data
         tf,
         integer,
         floating,
-        dropDown
+        dropDown,
+        word
     }
 }
