@@ -19,7 +19,14 @@ namespace Shop.Data.CustomFieldTypes
         { 
             get
             {
-                return int.Parse(_categoryId.ToString());
+                if (int.TryParse(_categoryId.ToString(), out int result))
+                {
+                    return result;
+                }
+                else
+                {
+                    return 0;
+                }
             }
             set
             {

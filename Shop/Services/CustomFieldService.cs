@@ -94,7 +94,7 @@ namespace Shop.Services
                         {
                             if (productFieldValue.CustomFieldId == existingCustomField.CustomFieldId)
                             {
-                                productFieldValues.Remove(productFieldValue);
+                                _db.ProductFieldValues.Remove(productFieldValue);
                             }
                         }
                     }

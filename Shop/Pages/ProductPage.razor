@@ -25,9 +25,6 @@ else
                 <div class="col-4">
                     <input class="form-control" type="text" @bind="@productDTO.Product.ProductName" />
                 </div>
-                <div class="col-4">
-                    @productDTO.Product.ProductName
-                </div>
             </div>
             <div class="row m-1">
                 <div class="col-3">
@@ -39,9 +36,6 @@ else
                         <label>\ @category</label>
                     }
                 </div>
-                <div class="col-4">
-                    <a>@productDTO.Product.CategoryId</a>
-                </div>
             </div>
             <div class="row m-1">
                 <div class="col-3">
@@ -49,9 +43,6 @@ else
                 </div>
                 <div class="col-4">
                     <textarea class="form-control textarea" type="text" rows="8" @bind="@productDTO.Product.ProducDescription" />
-                </div>
-                <div class="col-4">
-                    @productDTO.Product.ProducDescription
                 </div>
             </div>
             @foreach (var item in productDTO.Fields)
@@ -94,31 +85,11 @@ else
                                 }
                             </select>
                             break;
-                            }
-                        </div>
-                    <div class="col-4">
-                        @switch (item.Value)
-                        {
-                            case ProductFieldValueBool productFieldValue:
-                                <a>@productFieldValue.Value</a>
-                                break;
-                            case ProductFieldValueInt productFieldValue:
-                                <a>@productFieldValue.Value</a>
-                                break;
-                            case ProductFieldValueFloat productFieldValue:
-                                <a>@productFieldValue.Value</a>
-                                break;
-                            case ProductFieldValueString productFieldValue:
-                                <a>@productFieldValue.Value</a>
-                                break;
-                            case ProductFieldValueDDI productFieldValue:
-                                <a>@productFieldValue.Value</a>
-                                break;
                         }
                     </div>
                 </div>
             }
-            <div class="col-12">
+            <div class="col-12 m-5">
                 <button class="btn btn-primary form-control" type="submit">Submit</button>
             </div>
         </div>
@@ -165,4 +136,4 @@ else
             result = Service.CreateProduct(productDTO);
         }
     }
-    }
+}

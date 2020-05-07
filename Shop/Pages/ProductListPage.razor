@@ -138,6 +138,7 @@
 
     private void DeleteProduct(Product product)
     {
-
+        Service.DeleteProduct(product);
+        products = Service.GetProducts();
     }
 }

@@ -265,5 +265,27 @@ namespace Shop.Services
         {
             return _db.Categories.ToList();
         }
+
+        public bool DeleteProduct(Product product)
+        {
+            try
+            {
+                List<ProductFieldValue> productFieldValues = _db.ProductFieldValues.ToList();
+                foreach (var productFieldValue in productFieldValues)
+                {
+                    if (productFieldValue.ProductId == product.ProductId)
+                    {
+                        _db.ProductFieldValues.Remove(productFieldValue);
+                    }
+                }
+                _db.Products.Remove(product);
+                _db.SaveChanges();
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+            return true;
+        }
     }
 }
