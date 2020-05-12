@@ -5,7 +5,9 @@
 @using Shop.Services
 @using Shop.Data.CustomFieldTypes
 @using Shop.Data
+@using Blazored.Toast.Configuration
 @inherits OwningComponentBase<ProductService>
+@inject IToastService toastService
 
 <h3>Product Page</h3>
 
@@ -45,6 +47,7 @@ else
                     <textarea class="form-control textarea" type="text" rows="8" @bind="@productDTO.Product.ProducDescription" />
                 </div>
             </div>
+
             @foreach (var item in productDTO.Fields)
             {
                 <div class="row m-1">
@@ -55,36 +58,38 @@ else
                         @switch (item.Value)
                         {
                             case ProductFieldValueBool productFieldValue:
+                                //a little bit of a HACK here, but it works
+                                if(IncreaseCheckboxId())
                                 {
-                                    <div class="form-group">
+                                    <div class="form">
                                         <div class="custom-control custom-checkbox">
-                                            <input type="checkbox" class="custom-control-input" id="customCheck1" @bind="productFieldValue.Value">
-                                            <label class="custom-control-label" for="customCheck1">Check this custom checkbox</label>
+                                            <input type="checkbox" class="custom-control-input" id="checkbox_@checkboxId" @bind="productFieldValue.Value">
+                                            <label class="custom-control-label" for="checkbox_@checkboxId"></label>
                                         </div>
                                     </div>
-                            }
-                            break;
-                            case ProductFieldValueInt productFieldValue:
-                            <input class="form-control" type="text" @bind="@productFieldValue.Value" />
-                            break;
-                            case ProductFieldValueFloat productFieldValue:
-                            <input class="form-control" type="text" @bind="@productFieldValue.Value" />
-                            break;
-                            case ProductFieldValueString productFieldValue:
-                            <input class="form-control" type="text" @bind="@productFieldValue.Value" />
-                            break;
-                            case ProductFieldValueDDI productFieldValue:
-                            <select @bind="productFieldValue.Value" class="form-control">
-                                @if (true)
-                                {
-                                    CustomFieldDTO customFieldDto = (CustomFieldDTO)item.Key;
-                                    foreach (var dropDownItem in customFieldDto.DropDownItems)
-                                    {
-                                        <option class="dropdown-item" value="@dropDownItem.DropDownItemName">@dropDownItem.DropDownItemName</option>
-                                    }
                                 }
-                            </select>
-                            break;
+                                break;
+                            case ProductFieldValueInt productFieldValue:
+                                <input class="form-control" type="text" @bind="@productFieldValue.Value" />
+                                break;
+                            case ProductFieldValueFloat productFieldValue:
+                                <input class="form-control" type="text" @bind="@productFieldValue.Value" />
+                                break;
+                            case ProductFieldValueString productFieldValue:
+                                <input class="form-control" type="text" @bind="@productFieldValue.Value" />
+                                break;
+                            case ProductFieldValueDDI productFieldValue:
+                                <select @bind="productFieldValue.Value" class="form-control">
+                                    @if (true)
+                                    {
+                                        CustomFieldDTO customFieldDto = (CustomFieldDTO)item.Key;
+                                        foreach (var dropDownItem in customFieldDto.DropDownItems)
+                                        {
+                                            <option class="dropdown-item" value="@dropDownItem.DropDownItemName">@dropDownItem.DropDownItemName</option>
+                                        }
+                                    }
+                                </select>
+                                break;
                         }
                     </div>
                 </div>
@@ -95,6 +100,12 @@ else
         </div>
     </EditForm>
 }
+@*<BlazoredToasts Position="ToastPosition.BottomRight"
+                Timeout="10"
+                IconType="IconType.FontAwesome"
+                SuccessClass="success-toast-override"
+                SuccessIcon="fa fa-thumbs-up"
+                ErrorIcon="fa fa-bug" />*@
 
 
 @code {
@@ -105,6 +116,7 @@ else
     public string CategoryId { get; set; }
 
     private ProductDTO productDTO;
+    private int checkboxId;
 
     protected override void OnInitialized()
     {
@@ -122,6 +134,7 @@ else
                 productDTO = Service.GetProductDTO(productId);
             }
         }
+        checkboxId = 0;
     }
 
     private void ValidSubmit()
@@ -130,10 +143,33 @@ else
         if (productDTO.Product.ProductId > 0)
         {
             result = Service.UpdateProduct(productDTO);
+            if (result)
+            {
+                toastService.ShowSuccess("Product " + productDTO.Product.ProductName + " succesfully updated");
+            }
+            else
+            {
+                toastService.ShowWarning("A problem occured while updating " + productDTO.Product.ProductName + " to Product Library");
+            }
         }
         else
         {
             result = Service.CreateProduct(productDTO);
+            if (result)
+            {
+                toastService.ShowSuccess("Product " + productDTO.Product.ProductName + " added to Product Library");
+            }
+            else
+            {
+                toastService.ShowWarning("A problem occured while adding " + productDTO.Product.ProductName + " to Product Library");
+            }
         }
+
+    }
+
+    private bool IncreaseCheckboxId()
+    {
+        checkboxId++;
+        return true;
     }
 }

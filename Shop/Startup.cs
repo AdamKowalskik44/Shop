@@ -16,6 +16,7 @@ using Microsoft.Extensions.Hosting;
 using Shop.Areas.Identity;
 using Shop.Data;
 using Shop.Services;
+using Blazored.Toast;
 
 namespace Shop
 {
@@ -44,6 +45,7 @@ namespace Shop
             services.AddScoped<CustomFieldService>();
             services.AddScoped<DropDownItemService>();
             services.AddScoped<ProductService>();
+            services.AddBlazoredToast();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
