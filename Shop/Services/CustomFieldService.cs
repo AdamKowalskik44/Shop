@@ -116,16 +116,5 @@ namespace Shop.Services
             }
             return true;
         }
-
-        public Category GetCategory(int categoryId)
-        {
-            Category category = new Category();
-            return _db.Categories.FirstOrDefault(u => u.CategoryId == categoryId);
-        }
-
-        public List<Category> GetCategories()
-        {
-            return _db.Categories.ToList();
-        }
     }
 }

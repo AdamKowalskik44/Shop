@@ -122,5 +122,19 @@ namespace Shop.Services
             }
             return true;
         }
+
+        public Stack<string> GetCategoryPath(int categoryId, Stack<string> categories)
+        {
+            Category category = _db.Categories.FirstOrDefault(u => u.CategoryId == categoryId);
+            if (category != null)
+            {
+                categories.Push(category.CategoryName);
+                if (category.ParentCategoryId != 0)
+                {
+                    GetCategoryPath(category.ParentCategoryId, categories);
+                }
+            }
+            return categories;
+        }
     }
 }

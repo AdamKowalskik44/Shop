@@ -11,10 +11,12 @@ namespace Shop.Services
     public class ProductService
     {
         private readonly ApplicationDbContext _db;
+        private CategoryService categoryService;
 
         public ProductService(ApplicationDbContext db)
         {
             _db = db;
+            categoryService = new CategoryService(_db);
         }
 
         public ProductDTO GetProductDTO(int productId)
@@ -28,7 +30,7 @@ namespace Shop.Services
             }
 
             //Find category path
-            result.CategoryPath = GetCategoryPath(result.Product.CategoryId, result.CategoryPath);
+            result.CategoryPath = categoryService.GetCategoryPath(result.Product.CategoryId, result.CategoryPath);
 
             //Find and attach all custom fields and their values
             List<CustomField> customFields = _db.CustomFields.ToList();
@@ -65,20 +67,6 @@ namespace Shop.Services
         public ProductDTO GetProductDTO(Product product)
         {
             return GetProductDTO(product.ProductId);
-        }
-
-        public Stack<string> GetCategoryPath(int categoryId, Stack<string> categories)
-        {
-            Category category = _db.Categories.FirstOrDefault(u => u.CategoryId == categoryId);
-            if (category != null)
-            {
-                categories.Push(category.CategoryName);
-                if (category.ParentCategoryId != 0)
-                {
-                    GetCategoryPath(category.ParentCategoryId, categories);
-                }
-            }
-            return categories;
         }
 
         public List<Product> GetProducts()
@@ -216,7 +204,7 @@ namespace Shop.Services
             result.Product = new Product();
             result.Product.ProductId = 0;
             result.Product.CategoryId = categoryId;
-            result.CategoryPath = GetCategoryPath(result.Product.CategoryId, result.CategoryPath);
+            result.CategoryPath = categoryService.GetCategoryPath(result.Product.CategoryId, result.CategoryPath);
 
             List<CustomField> customFields = _db.CustomFields.ToList();
             foreach (var customField in customFields)
