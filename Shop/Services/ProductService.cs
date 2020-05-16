@@ -1,6 +1,6 @@
 ﻿using Shop.Data;
 using Shop.Data.CustomFieldTypes;
-using Shop.Data.Product;
+using Shop.Data.ProductTypes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,12 +11,14 @@ namespace Shop.Services
     public class ProductService
     {
         private readonly ApplicationDbContext _db;
-        private CategoryService categoryService;
+        private readonly CategoryService categoryService;
+        private readonly PhotoService photoService;
 
         public ProductService(ApplicationDbContext db)
         {
             _db = db;
             categoryService = new CategoryService(_db);
+            photoService = new PhotoService(_db);
         }
 
         public ProductDTO GetProductDTO(int productId)
@@ -61,6 +63,9 @@ namespace Shop.Services
                 }
             }
 
+            //attach photos
+            result.Photos = photoService.GetPhotos(productId);
+
             return result;
         }
 
@@ -92,7 +97,27 @@ namespace Shop.Services
                         {
                             return false;
                         }
-                    }                    
+                    }
+
+                    //dump old photos
+                    List <Photo> oldPhotos = photoService.GetPhotos(productDTO.Product.ProductId);
+                    foreach (var photo in oldPhotos)
+                    {
+                        if (!photoService.DeletePhoto(photo))
+                        {
+                            return false;
+                        }
+                    }
+
+                    //save new Photos
+                    foreach (var photo in productDTO.Photos)
+                    {
+                        photo.ProductId = productDTO.Product.ProductId;
+                        if (!photoService.CreatePhoto(photo))
+                        {
+                            return false;
+                        }
+                    }
                 }
                 else
                 {
@@ -162,8 +187,8 @@ namespace Shop.Services
         {
             try
             {
+                //save product
                 _db.Products.Add(productDTO.Product);
-                _db.SaveChanges();
 
                 //save ProductFieldValues
                 foreach (var productFieldValue in productDTO.Fields)
@@ -175,6 +200,18 @@ namespace Shop.Services
                         return false;
                     }
                 }
+
+                //save photos
+                foreach (var photo in productDTO.Photos)
+                {
+                    photo.ProductId = productDTO.Product.ProductId;
+                    if (!photoService.CreatePhoto(photo))
+                    {
+                        return false;
+                    }
+                }
+
+                _db.SaveChanges();
             }
             catch (Exception)
             {

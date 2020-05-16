@@ -1,5 +1,4 @@
-﻿using Shop.Data.CustomFieldTypes;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -8,15 +7,16 @@ using System.Threading.Tasks;
 
 namespace Shop.Data.ProductTypes
 {
-    public class ProductFieldValue : IProductFieldValue
+    public class Photo
     {
         [Key]
-        public int ProductFieldValueId { get; set; }
+        public int PhotoId { get; set; }
 
-        public int CustomFieldId { get; set; }
+        [Required]
+        public byte[] Image { get; set; }
 
-        [ForeignKey("CustomFieldId")]
-        public virtual CustomField CustomField { get; set; }
+        [Required]
+        public bool MainPhoto { get; set; }
 
         public int ProductId { get; set; }
 

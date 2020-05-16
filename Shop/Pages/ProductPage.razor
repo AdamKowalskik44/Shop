@@ -1,9 +1,10 @@
 ﻿@page "/Product"
 @page "/Product/{ProductId}"
 @page "/Product/{ProductId}/{CategoryId}"
-@using Shop.Data.Product
+@using Shop.Data.ProductTypes
 @using Shop.Services
 @using Shop.Data.CustomFieldTypes
+@using Shop.Pages.Component
 @using Shop.Data
 @using Blazored.Toast.Configuration
 @inherits OwningComponentBase<ProductService>
@@ -48,6 +49,52 @@ else
                 </div>
             </div>
 
+            @foreach (var photo in productDTO.Photos)
+            {
+                if (photo.MainPhoto)
+                {
+                    <div class="row m-1">
+                        <div class="col-3">
+                            Main Photo
+                        </div>
+                        <div class="col-4">
+                            <Shop.Pages.Component.ImageDisplay Image="photo.Image" Width="100"></Shop.Pages.Component.ImageDisplay>
+                        </div>
+                        <div class="col-5">
+                            <button class="btn btn-danger" width="200px" type="button" @onclick="() => DeletePhoto(photo)">Delete </button>
+                        </div>
+                    </div>
+                }
+            }
+
+            @foreach (var photo in productDTO.Photos)
+            {
+                if (!photo.MainPhoto)
+                {
+                    <div class="row m-1">
+                        <div class="col-3">
+                            Photo
+                        </div>
+                        <div class="col-4">
+                            <Shop.Pages.Component.ImageDisplay Image="photo.Image" Width="100"></Shop.Pages.Component.ImageDisplay>
+                        </div>
+                        <div class="col-5">
+                            <button class="btn btn-danger" width="100%" type="button" @onclick="() => DeletePhoto(photo)">Delete </button>
+                            <button class="btn btn-primary" width="100%" type="button" @onclick="() => SetMainPhoto(photo)">Set as main photo </button>
+                        </div>
+                    </div>
+                }
+            }
+
+            <div class="row m-1">
+                <div class="col-3">
+                    Add new Photo
+                </div>
+                <div class="col-4">
+                    <Shop.Pages.Component.ImageUpload Photo="AddPhoto"></Shop.Pages.Component.ImageUpload>
+                </div>
+            </div>
+
             @foreach (var item in productDTO.Fields)
             {
                 <div class="row m-1">
@@ -59,7 +106,7 @@ else
                         {
                             case ProductFieldValueBool productFieldValue:
                                 //a little bit of a HACK here, but it works
-                                if(IncreaseCheckboxId())
+                                if (IncreaseCheckboxId())
                                 {
                                     <div class="form">
                                         <div class="custom-control custom-checkbox">
@@ -165,6 +212,32 @@ else
             }
         }
 
+    }
+
+    private void AddPhoto(byte[] image)
+    {
+        Photo photo = new Photo();
+        photo.PhotoId = 0;
+        photo.Image = image;
+        if (productDTO.Photos.Count == 0)
+        {
+            photo.MainPhoto = true;
+        }
+        productDTO.Photos.Add(photo);
+    }
+
+    private void DeletePhoto(Photo photo)
+    {
+        productDTO.Photos.Remove(photo);
+    }
+
+    private void SetMainPhoto(Photo mainPhoto)
+    {
+        foreach (var photo in productDTO.Photos)
+        {
+            photo.MainPhoto = false;
+        }
+        mainPhoto.MainPhoto = true;
     }
 
     private bool IncreaseCheckboxId()

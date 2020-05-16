@@ -4,7 +4,7 @@ using System.Text;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Shop.Data.CustomFieldTypes;
-using Shop.Data.Product;
+using Shop.Data.ProductTypes;
 
 namespace Shop.Data
 {
@@ -32,6 +32,7 @@ namespace Shop.Data
         public DbSet<ProductFieldValueString> ProductFieldValuesString { get; set; }
         public DbSet<ProductFieldValueFloat> ProductFieldValuesFloat { get; set; }
         public DbSet<ProductFieldValueDDI> ProductFieldValuesDDI { get; set; }
-        public DbSet<Shop.Data.Product.Product> Products { get; set; }
+        public DbSet<Product> Products { get; set; }
+        public DbSet<Photo> Photos { get; set; }
     }
 }

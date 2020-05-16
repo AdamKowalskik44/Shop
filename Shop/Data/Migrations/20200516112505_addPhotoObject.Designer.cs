@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Shop.Data;
 
 namespace Shop.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20200516112505_addPhotoObject")]
+    partial class addPhotoObject
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -286,30 +288,6 @@ namespace Shop.Data.Migrations
                     b.ToTable("DropDownItems");
                 });
 
-            modelBuilder.Entity("Shop.Data.ProductTypes.Photo", b =>
-                {
-                    b.Property<int>("PhotoId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<byte[]>("Image")
-                        .IsRequired()
-                        .HasColumnType("varbinary(max)");
-
-                    b.Property<bool>("MainPhoto")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("ProductId")
-                        .HasColumnType("int");
-
-                    b.HasKey("PhotoId");
-
-                    b.HasIndex("ProductId");
-
-                    b.ToTable("Photos");
-                });
-
             modelBuilder.Entity("Shop.Data.ProductTypes.Product", b =>
                 {
                     b.Property<int>("ProductId")
@@ -481,15 +459,6 @@ namespace Shop.Data.Migrations
                     b.HasOne("Shop.Data.CustomFieldTypes.CustomField", "CustomField")
                         .WithMany()
                         .HasForeignKey("CustomFieldId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Shop.Data.ProductTypes.Photo", b =>
-                {
-                    b.HasOne("Shop.Data.ProductTypes.Product", "Product")
-                        .WithMany()
-                        .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

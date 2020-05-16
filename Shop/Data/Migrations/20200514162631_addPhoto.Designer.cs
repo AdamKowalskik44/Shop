@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Shop.Data;
 
 namespace Shop.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20200514162631_addPhoto")]
+    partial class addPhoto
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -286,31 +288,7 @@ namespace Shop.Data.Migrations
                     b.ToTable("DropDownItems");
                 });
 
-            modelBuilder.Entity("Shop.Data.ProductTypes.Photo", b =>
-                {
-                    b.Property<int>("PhotoId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<byte[]>("Image")
-                        .IsRequired()
-                        .HasColumnType("varbinary(max)");
-
-                    b.Property<bool>("MainPhoto")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("ProductId")
-                        .HasColumnType("int");
-
-                    b.HasKey("PhotoId");
-
-                    b.HasIndex("ProductId");
-
-                    b.ToTable("Photos");
-                });
-
-            modelBuilder.Entity("Shop.Data.ProductTypes.Product", b =>
+            modelBuilder.Entity("Shop.Data.Product.Product", b =>
                 {
                     b.Property<int>("ProductId")
                         .ValueGeneratedOnAdd()
@@ -319,6 +297,9 @@ namespace Shop.Data.Migrations
 
                     b.Property<int>("CategoryId")
                         .HasColumnType("int");
+
+                    b.Property<byte[]>("Image")
+                        .HasColumnType("varbinary(max)");
 
                     b.Property<string>("ProducDescription")
                         .IsRequired()
@@ -335,7 +316,7 @@ namespace Shop.Data.Migrations
                     b.ToTable("Products");
                 });
 
-            modelBuilder.Entity("Shop.Data.ProductTypes.ProductFieldValue", b =>
+            modelBuilder.Entity("Shop.Data.Product.ProductFieldValue", b =>
                 {
                     b.Property<int>("ProductFieldValueId")
                         .ValueGeneratedOnAdd()
@@ -363,9 +344,9 @@ namespace Shop.Data.Migrations
                     b.HasDiscriminator<string>("Discriminator").HasValue("ProductFieldValue");
                 });
 
-            modelBuilder.Entity("Shop.Data.ProductTypes.ProductFieldValueBool", b =>
+            modelBuilder.Entity("Shop.Data.Product.ProductFieldValueBool", b =>
                 {
-                    b.HasBaseType("Shop.Data.ProductTypes.ProductFieldValue");
+                    b.HasBaseType("Shop.Data.Product.ProductFieldValue");
 
                     b.Property<bool>("Value")
                         .HasColumnType("bit");
@@ -373,9 +354,9 @@ namespace Shop.Data.Migrations
                     b.HasDiscriminator().HasValue("ProductFieldValueBool");
                 });
 
-            modelBuilder.Entity("Shop.Data.ProductTypes.ProductFieldValueDDI", b =>
+            modelBuilder.Entity("Shop.Data.Product.ProductFieldValueDDI", b =>
                 {
-                    b.HasBaseType("Shop.Data.ProductTypes.ProductFieldValue");
+                    b.HasBaseType("Shop.Data.Product.ProductFieldValue");
 
                     b.Property<string>("Value")
                         .HasColumnName("ProductFieldValueDDI_Value")
@@ -384,9 +365,9 @@ namespace Shop.Data.Migrations
                     b.HasDiscriminator().HasValue("ProductFieldValueDDI");
                 });
 
-            modelBuilder.Entity("Shop.Data.ProductTypes.ProductFieldValueFloat", b =>
+            modelBuilder.Entity("Shop.Data.Product.ProductFieldValueFloat", b =>
                 {
-                    b.HasBaseType("Shop.Data.ProductTypes.ProductFieldValue");
+                    b.HasBaseType("Shop.Data.Product.ProductFieldValue");
 
                     b.Property<float>("Value")
                         .HasColumnName("ProductFieldValueFloat_Value")
@@ -395,9 +376,9 @@ namespace Shop.Data.Migrations
                     b.HasDiscriminator().HasValue("ProductFieldValueFloat");
                 });
 
-            modelBuilder.Entity("Shop.Data.ProductTypes.ProductFieldValueInt", b =>
+            modelBuilder.Entity("Shop.Data.Product.ProductFieldValueInt", b =>
                 {
-                    b.HasBaseType("Shop.Data.ProductTypes.ProductFieldValue");
+                    b.HasBaseType("Shop.Data.Product.ProductFieldValue");
 
                     b.Property<int>("Value")
                         .HasColumnName("ProductFieldValueInt_Value")
@@ -406,9 +387,9 @@ namespace Shop.Data.Migrations
                     b.HasDiscriminator().HasValue("ProductFieldValueInt");
                 });
 
-            modelBuilder.Entity("Shop.Data.ProductTypes.ProductFieldValueString", b =>
+            modelBuilder.Entity("Shop.Data.Product.ProductFieldValueString", b =>
                 {
-                    b.HasBaseType("Shop.Data.ProductTypes.ProductFieldValue");
+                    b.HasBaseType("Shop.Data.Product.ProductFieldValue");
 
                     b.Property<string>("Value")
                         .IsRequired()
@@ -485,16 +466,7 @@ namespace Shop.Data.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Shop.Data.ProductTypes.Photo", b =>
-                {
-                    b.HasOne("Shop.Data.ProductTypes.Product", "Product")
-                        .WithMany()
-                        .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Shop.Data.ProductTypes.Product", b =>
+            modelBuilder.Entity("Shop.Data.Product.Product", b =>
                 {
                     b.HasOne("Shop.Data.Category", "Category")
                         .WithMany()
@@ -503,7 +475,7 @@ namespace Shop.Data.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Shop.Data.ProductTypes.ProductFieldValue", b =>
+            modelBuilder.Entity("Shop.Data.Product.ProductFieldValue", b =>
                 {
                     b.HasOne("Shop.Data.CustomFieldTypes.CustomField", "CustomField")
                         .WithMany()
@@ -511,7 +483,7 @@ namespace Shop.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Shop.Data.ProductTypes.Product", "Product")
+                    b.HasOne("Shop.Data.Product.Product", "Product")
                         .WithMany()
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)

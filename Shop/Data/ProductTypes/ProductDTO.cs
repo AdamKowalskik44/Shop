@@ -3,9 +3,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Shop.Data.Product;
+using Shop.Data.ProductTypes;
 
-namespace Shop.Data.Product
+namespace Shop.Data.ProductTypes
 {
     public class ProductDTO
     {
@@ -13,11 +13,14 @@ namespace Shop.Data.Product
 
         public Dictionary<CustomField, ProductFieldValue> Fields { get; set; }
 
+        public List<Photo> Photos { get; set; }
+
         public Stack<string> CategoryPath { get; set; }
 
         public ProductDTO()
         {
             Fields = new Dictionary<CustomField, ProductFieldValue>();
+            Photos = new List<Photo>();
             CategoryPath = new Stack<string>();
         }
     }

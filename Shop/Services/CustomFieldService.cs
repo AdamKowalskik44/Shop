@@ -1,6 +1,6 @@
 ﻿using Shop.Data;
 using Shop.Data.CustomFieldTypes;
-using Shop.Data.Product;
+using Shop.Data.ProductTypes;
 using System;
 using System.Collections.Generic;
 using System.Linq;

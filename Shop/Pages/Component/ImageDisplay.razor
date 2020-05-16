@@ -1,0 +1,44 @@
+﻿@if (Image != null)
+{
+    if (width == "" && width == null)
+    {
+        <img src="@ConvertImageToDisplay(Image)" width="200px" />
+    }
+    else
+    {
+        <img src="@ConvertImageToDisplay(Image)" width="@width" />
+    }
+}
+
+
+@code {
+
+    [Parameter]
+    public byte[] Image { get; set; }
+
+    [Parameter]
+    public int? Width
+    {
+        get { return Width; }
+        set
+        {
+            width = value + "px";
+        }
+    }
+
+    private string width;
+
+    string ConvertImageToDisplay(byte[] image)
+    {
+        if (image != null)
+        {
+            var base64 = Convert.ToBase64String(image);
+            var finalString = string.Format("data:image/jpg;base64,{0}", base64);
+            return finalString;
+        }
+        else
+        {
+            return null;
+        }
+    }
+}

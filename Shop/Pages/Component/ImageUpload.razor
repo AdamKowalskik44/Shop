@@ -1,0 +1,23 @@
+﻿@using BlazorInputFile
+@using System.IO
+ 
+<InputFile OnChange="HandleSelection"></InputFile>
+
+@code {
+    [Parameter]
+    public EventCallback<byte[]> Photo { get; set; }
+
+    public byte[] Image { get; set; }
+
+    async Task HandleSelection(IFileListEntry[] files)
+    {
+        var file = files.FirstOrDefault();
+        if (file != null)
+        {
+            var ms = new MemoryStream();
+            await file.Data.CopyToAsync(ms);
+            Image = ms.ToArray();
+            await Photo.InvokeAsync(Image);
+        }
+    }
+}
