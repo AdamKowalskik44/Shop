@@ -21,7 +21,7 @@ else
     <EditForm Model="@productDTO" OnValidSubmit="@ValidSubmit">
         <ValidationSummary></ValidationSummary>
         <div class="container">
-            <div class="row m-1">
+            <div class="row m-2 p-2 border">
                 <div class="col-3">
                     Product
                 </div>
@@ -29,7 +29,7 @@ else
                     <input class="form-control" type="text" @bind="@productDTO.Product.ProductName" />
                 </div>
             </div>
-            <div class="row m-1">
+            <div class="row m-2 p-2 border">
                 <div class="col-3">
                     Category
                 </div>
@@ -40,7 +40,7 @@ else
                     }
                 </div>
             </div>
-            <div class="row m-1">
+            <div class="row m-2 p-2 border">
                 <div class="col-3">
                     Description
                 </div>
@@ -48,12 +48,41 @@ else
                     <textarea class="form-control textarea" type="text" rows="8" @bind="@productDTO.Product.ProducDescription" />
                 </div>
             </div>
+            <div class="row m-2 p-2 border">
+                <div class="col-3">
+                    Price
+                </div>
+                <div class="col-4">
+                     <input class="form-control" type="text" @bind="@productDTO.Product.Price" />
+                </div>
+            </div>
+            <div class="row m-2 p-2 border">
+                <div class="col-3">
+                    Stock
+                </div>
+                <div class="col-4">
+                     <input class="form-control" type="text" @bind="@productDTO.Product.Stock" />
+                </div>
+            </div>
+            <div class="row m-2 p-2 border">
+                <div class="col-3">
+                    Display on main page
+                </div>
+                <div class="col-4">
+                    <div class="form">
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="displayOnIndex" @bind="productDTO.Product.DisplayOnIndex">
+                            <label class="custom-control-label" for="displayOnIndex"></label>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             @foreach (var photo in productDTO.Photos)
             {
                 if (photo.MainPhoto)
                 {
-                    <div class="row m-1">
+                    <div class="row m-2 p-2 border">
                         <div class="col-3">
                             Main Photo
                         </div>
@@ -71,7 +100,7 @@ else
             {
                 if (!photo.MainPhoto)
                 {
-                    <div class="row m-1">
+                    <div class="row m-2 p-2 border">
                         <div class="col-3">
                             Photo
                         </div>
@@ -86,7 +115,7 @@ else
                 }
             }
 
-            <div class="row m-1">
+            <div class="row m-2 p-2 border">
                 <div class="col-3">
                     Add new Photo
                 </div>
@@ -97,7 +126,7 @@ else
 
             @foreach (var item in productDTO.Fields)
             {
-                <div class="row m-1">
+                <div class="row m-2 p-2 border">
                     <div class="col-3">
                         @item.Key.CustomFieldName
                     </div>

@@ -23,5 +23,17 @@ namespace Shop.Data.ProductTypes
             Photos = new List<Photo>();
             CategoryPath = new Stack<string>();
         }
+
+        public Photo GetMainPhoto()
+        {
+            foreach (var photo in Photos)
+            {
+                if (photo.MainPhoto)
+                {
+                    return photo;
+                }
+            }
+            return null;
+        }
     }
 }

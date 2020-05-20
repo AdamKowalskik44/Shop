@@ -74,6 +74,20 @@ namespace Shop.Services
             return GetProductDTO(product.ProductId);
         }
 
+        public List<ProductDTO> GetIndexProductDTOs()
+        {
+            List<Product> products = GetProducts();
+            List<ProductDTO> result = new List<ProductDTO>();
+            foreach (var product in products)
+            {
+                if (product.DisplayOnIndex)
+                {
+                    result.Add(GetProductDTO(product));
+                }
+            }
+            return result;
+        }
+
         public List<Product> GetProducts()
         {
             return _db.Products.ToList();
@@ -89,6 +103,9 @@ namespace Shop.Services
                 {
                     existingProduct.ProductName = productDTO.Product.ProductName;
                     existingProduct.ProducDescription = productDTO.Product.ProducDescription;
+                    existingProduct.Price = productDTO.Product.Price;
+                    existingProduct.Stock = productDTO.Product.Stock;
+                    existingProduct.DisplayOnIndex = productDTO.Product.DisplayOnIndex;
 
                     //save ProductFieldValues
                     foreach (var productFieldValue in productDTO.Fields)
@@ -109,9 +126,12 @@ namespace Shop.Services
                         }
                     }
 
+                    _db.SaveChanges();
+
                     //save new Photos
                     foreach (var photo in productDTO.Photos)
                     {
+                        photo.PhotoId = 0;
                         photo.ProductId = productDTO.Product.ProductId;
                         if (!photoService.CreatePhoto(photo))
                         {

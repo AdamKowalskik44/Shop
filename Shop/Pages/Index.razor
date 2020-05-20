@@ -1,5 +1,30 @@
 ﻿@page "/"
+@using Shop.Data.ProductTypes
+@using Shop.Services
+@inherits OwningComponentBase<ProductService>
 
-<h1>Hello, world!</h1>
+<div class="container">
+    <div class="row">
+        <div class="col-2" style="float:right">
+            <h3>filters</h3>
+        </div>
+        <div class="col-8">
+            @foreach (var product in products)
+            {
+                <Shop.Pages.Component.CompactProductDisplayComponent Product="product"></Shop.Pages.Component.CompactProductDisplayComponent>
+            }
+        </div>
+        <div class="col-2" style="float:right">
+            <h3>ads</h3>
+        </div>
+    </div>
+</div>
 
-Welcome to your new app.
+@code{
+    private List<ProductDTO> products { get; set; }
+
+    protected override void OnInitialized()
+    {
+        products = Service.GetIndexProductDTOs();
+    }
+}

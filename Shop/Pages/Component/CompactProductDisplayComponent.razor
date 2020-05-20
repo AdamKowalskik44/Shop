@@ -1,0 +1,33 @@
+﻿@using Shop.Data.ProductTypes
+
+<div class="row p-1 m-1 border row">
+    <div class="col-3">
+        @if (Product.GetMainPhoto() != null)
+        {
+            <ImageDisplay Image="Product.GetMainPhoto().Image" Width="150"></ImageDisplay>
+        }
+    </div>
+    <div class="d-flex align-items-start flex-column col-9" >
+        <div class="mb-auto p-2 container row">
+            <div class="col">
+                <h7>@Product.Product.ProductName</h7>
+            </div>
+            <div class="col float-right">
+                <button class="btn btn-primary float-right" @onclick="() => AddToCart(0)">Add to cart</button>
+            </div>
+        </div>
+        <div class="p-2">
+            <h7>@Product.Product.Price</h7>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public ProductDTO Product { get; set; }
+
+    private bool AddToCart(int quantity)
+    {
+        return false;
+    }
+}

@@ -18,6 +18,15 @@ namespace Shop.Data.ProductTypes
         [Required]
         public string ProducDescription { get; set; }
 
+        [Required]
+        public float Price { get; set; }
+
+        [Required]
+        public int Stock { get; set; }
+
+        [Required]
+        public bool DisplayOnIndex { get; set; }
+
         public int CategoryId { get; set; }
 
         [ForeignKey("CategoryId")]
