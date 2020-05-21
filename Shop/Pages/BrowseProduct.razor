@@ -1,0 +1,145 @@
+﻿@page "/Browse/Product/{ProductId}"
+@using Shop.Services
+@using Shop.Data.ProductTypes
+@inherits OwningComponentBase<ProductService>
+@inject NavigationManager navigationManager
+
+@if (productDTO == null)
+{
+    <h3>Product not found</h3>
+}
+else
+{
+    <div class="container row">
+        <div class="col-8">
+            <h3>@productDTO.Product.ProductName</h3>
+            @foreach (var category in productDTO.CategoryPath)
+            {
+                <button type="button" class="btn btn-link" style="margin-left:0px; margin-right:0px; padding-left:0px; padding-right:0px" @onclick="() => NavigateToBrowseCategory(category)">\ @category</button>
+            }
+        </div>
+        <div class="col-2">
+            <h3 class="float-right">@productDTO.Product.Price $</h3>
+        </div>
+        <div class="col-2">
+            <form>
+                <button class="btn btn-primary m-1" style="width:150px" @onclick="AddToCart">Add to Cart</button>
+                <input class="m-1" style="width:150px" type="number" min="1" max=@productDTO.Product.Stock @bind="cartQuantity">
+            </form>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="row m-2 p-2 border">
+            <div class="col-3">
+                Description
+            </div>
+            <div class="col-4">
+                @productDTO.Product.ProducDescription
+            </div>
+        </div>
+
+        <div class="m-2 p-2 " >
+            <div class="container row d-flex justify-content-center " style="position: center">
+                <button class="btn btn-secondary p-2 m-2 oi oi-arrow-left" style="width:100px" @onclick="() => ChangeActivePhoto(false)"></button>
+                <div class="m-2 p-2">
+                    <Shop.Pages.Component.ImageDisplay Image="photos[activePhoto].Image" Width="500"></Shop.Pages.Component.ImageDisplay>
+                </div>
+                <button class="btn btn-secondary p-2 m-2 oi oi-arrow-right" style="width:100px" @onclick="() => ChangeActivePhoto(true)"></button>
+            </div>
+        </div>
+
+        @foreach (var item in productDTO.Fields)
+        {
+            <div class="row m-2 p-2 border">
+                <div class="col-3">
+                    @item.Key.CustomFieldName
+                </div>
+                <div class="col-4">
+                    @switch (item.Value)
+                    {
+                        case ProductFieldValueBool productFieldValue:
+                            @if (productFieldValue.Value)
+                            {
+                                <label>Yes</label>
+                            }
+                            else
+                            {
+                                <label>No</label>
+                            }
+                            break;
+                        case ProductFieldValueInt productFieldValue:
+                            @productFieldValue.Value
+                            break;
+                        case ProductFieldValueFloat productFieldValue:
+                            @productFieldValue.Value
+                            break;
+                        case ProductFieldValueString productFieldValue:
+                            @productFieldValue.Value
+                            break;
+                        case ProductFieldValueDDI productFieldValue:
+                            @productFieldValue.Value
+                            break;
+                    }
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    [Parameter]
+    public string ProductId { get; set; }
+
+    private ProductDTO productDTO;
+    private int checkboxId;
+    private Photo[] photos;
+    private int activePhoto;
+    private int cartQuantity;
+
+    protected override void OnInitialized()
+    {
+        if (int.TryParse(ProductId, out int productId))
+        {
+            productDTO = Service.GetProductDTO(productId);
+            if (productDTO != null)
+            {
+                photos = productDTO.Photos.ToArray();
+                for (int i = 0; i < photos.Length; i++)
+                {
+                    if (photos[i].MainPhoto)
+                    {
+                        Photo temp = photos[0];
+                        photos[0] = photos[i];
+                        photos[i] = temp;
+                    }
+                }
+            }
+        }
+        checkboxId = 0;
+        activePhoto = 0;
+        cartQuantity = 1;
+    }
+
+    private void ChangeActivePhoto(bool shift)
+    {
+        if (shift && activePhoto != photos.GetUpperBound(0))
+        {
+            activePhoto++;
+        }
+        else if (!shift && activePhoto != 0)
+        {
+            activePhoto--;
+        }
+    }
+
+    private void NavigateToBrowseCategory(string category)
+    {
+        navigationManager.NavigateTo("/Browse/Category" + category);
+    }
+
+    private void AddToCart()
+    {
+        //cartQuantity
+    }
+}

@@ -9,8 +9,7 @@
 @using Blazored.Toast.Configuration
 @inherits OwningComponentBase<ProductService>
 @inject IToastService toastService
-
-<h3>Product Page</h3>
+@inject NavigationManager navigationManager
 
 @if (productDTO == null)
 {
@@ -18,6 +17,15 @@
 }
 else
 {
+    <div class="row container">
+        <div class="col-10">
+            <h3>Product Page</h3>
+        </div>
+        <div class="col-2">
+            <button class="btn btn-primary" @onclick="NavigateToBrowseProduct">Go to browse Page</button>
+        </div>
+    </div>
+
     <EditForm Model="@productDTO" OnValidSubmit="@ValidSubmit">
         <ValidationSummary></ValidationSummary>
         <div class="container">
@@ -176,13 +184,6 @@ else
         </div>
     </EditForm>
 }
-@*<BlazoredToasts Position="ToastPosition.BottomRight"
-                Timeout="10"
-                IconType="IconType.FontAwesome"
-                SuccessClass="success-toast-override"
-                SuccessIcon="fa fa-thumbs-up"
-                ErrorIcon="fa fa-bug" />*@
-
 
 @code {
     [Parameter]
@@ -273,5 +274,13 @@ else
     {
         checkboxId++;
         return true;
+    }
+
+    private void NavigateToBrowseProduct()
+    {
+        if (productDTO != null && productDTO.Product.ProductId != 0) //TODO SPRAWDZIĆ
+        {
+            navigationManager.NavigateTo("/Browse/Product/" + productDTO.Product.ProductId);
+        }
     }
 }
