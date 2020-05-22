@@ -43,6 +43,31 @@ namespace Shop.Services
                 {
                     ProductFieldValue productFieldValue = _db.ProductFieldValues.FirstOrDefault
                         (u => (u.CustomFieldId == customField.CustomFieldId && u.ProductId == result.Product.ProductId));
+
+                    if (productFieldValue == null)
+                    {
+                        switch (customField.FieldType)
+                        {
+                            case CustomFieldType.tf:
+                                productFieldValue = new ProductFieldValueBool();
+                                break;
+                            case CustomFieldType.integer:
+                                productFieldValue = new ProductFieldValueInt();
+                                break;
+                            case CustomFieldType.floating:
+                                productFieldValue = new ProductFieldValueFloat();
+                                break;
+                            case CustomFieldType.dropDown:
+                                productFieldValue = new ProductFieldValueDDI();
+                                break;
+                            case CustomFieldType.word:
+                                productFieldValue = new ProductFieldValueString();
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+
                     if (customField.FieldType == CustomFieldType.dropDown)
                     {
                         CustomFieldDTO customFieldDTO = new CustomFieldDTO(customField);
@@ -110,6 +135,8 @@ namespace Shop.Services
                     //save ProductFieldValues
                     foreach (var productFieldValue in productDTO.Fields)
                     {
+                        productFieldValue.Value.CustomFieldId = productFieldValue.Key.CustomFieldId;
+                        productFieldValue.Value.ProductId = productDTO.Product.ProductId;
                         if (!UpdateProductFieldValue(productFieldValue.Value))
                         {
                             return false;
@@ -192,7 +219,7 @@ namespace Shop.Services
                 }
                 else
                 {
-                    return false;
+                    CreateFieldValue(productFieldValue);
                 }
             }
             catch (Exception)
@@ -209,6 +236,7 @@ namespace Shop.Services
             {
                 //save product
                 _db.Products.Add(productDTO.Product);
+                _db.SaveChanges();
 
                 //save ProductFieldValues
                 foreach (var productFieldValue in productDTO.Fields)
