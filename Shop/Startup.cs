@@ -45,6 +45,7 @@ namespace Shop
             services.AddScoped<CustomFieldService>();
             services.AddScoped<DropDownItemService>();
             services.AddScoped<ProductService>();
+            services.AddScoped<CartService>();
             services.AddBlazoredToast();
         }
 

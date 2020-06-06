@@ -1,4 +1,11 @@
-﻿@using Shop.Data.ProductTypes
+﻿@using Shop.Services
+@using Shop.Data.ProductTypes
+@using Shop.Data
+@using Microsoft.AspNetCore.Identity;
+@inject AuthenticationStateProvider authenticationStateProvider
+@inject UserManager<IdentityUser> UserManager
+@inject CartService cartService
+@inject NavigationManager navigationManager
 
 <div class="row p-1 m-1 border row">
     <div class="col-3">
@@ -7,13 +14,16 @@
             <ImageDisplay Image="Product.GetMainPhoto().Image" Width="150"></ImageDisplay>
         }
     </div>
-    <div class="d-flex align-items-start flex-column col-9" >
+    <div class="d-flex align-items-start flex-column col-9">
         <div class="mb-auto p-2 container row">
             <div class="col">
-                <h7>@Product.Product.ProductName</h7>
+                <h3><button class="nav-link btn" @onclick="NavigateToProduct">@Product.Product.ProductName</button></h3>
             </div>
             <div class="col float-right">
-                <button class="btn btn-primary float-right" @onclick="() => AddToCart(0)">Add to cart</button>
+                <form>
+                    <button class="m-1 btn btn-primary float-right" style="width:150px" @onclick="() => AddToCart()">Add to cart</button>
+                    <input class="m-1 float-right" style="width:150px" type="number" min="1" max=@Product.Product.Stock @bind="cartQuantity">
+                </form>
             </div>
         </div>
         <div class="p-2">
@@ -26,8 +36,28 @@
     [Parameter]
     public ProductDTO Product { get; set; }
 
-    private bool AddToCart(int quantity)
+    private int cartQuantity;
+
+    private async void AddToCart()
     {
-        return false;
+        AuthenticationState authstate = await authenticationStateProvider.GetAuthenticationStateAsync();
+        if (authstate.User.Identity.IsAuthenticated)
+        {
+            CartEntry cartEntry = new CartEntry();
+            cartEntry.CartEntryId = 0;
+            cartEntry.ProductId = Product.Product.ProductId;
+            cartEntry.UserId = UserManager.GetUserId(authstate.User);
+            cartEntry.Quantity = cartQuantity;
+            cartService.AddToCart(cartEntry);
+        }
+        else
+        {
+            navigationManager.NavigateTo("/Identity/Account/Login");
+        }
+    }
+
+    private void NavigateToProduct()
+    {
+        navigationManager.NavigateTo("/Browse/Product/" + Product.Product.ProductId);
     }
 }
