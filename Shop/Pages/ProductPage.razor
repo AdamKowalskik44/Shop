@@ -11,179 +11,183 @@
 @inject IToastService toastService
 @inject NavigationManager navigationManager
 
-@if (productDTO == null)
-{
-    <h3>Product not found</h3>
-}
-else
-{
-    <div class="row container">
-        <div class="col-10">
-            <h3>Product Page</h3>
-        </div>
-        <div class="col-2">
-            <button class="btn btn-primary" @onclick="NavigateToBrowseProduct">Go to browse Page</button>
-        </div>
-    </div>
-
-    <EditForm Model="@productDTO" OnValidSubmit="@ValidSubmit">
-        <ValidationSummary></ValidationSummary>
-        <div class="container">
-            <div class="row m-2 p-2 border">
-                <div class="col-3">
-                    Product
+<AuthorizeView Roles="admin, moderator" Context="auth">
+    <Authorized>
+        @if (productDTO == null)
+        {
+            <h3>Product not found</h3>
+        }
+        else
+        {
+            <div class="row container">
+                <div class="col-10">
+                    <h3>Product Page</h3>
                 </div>
-                <div class="col-4">
-                    <input class="form-control" type="text" @bind="@productDTO.Product.ProductName" />
+                <div class="col-2">
+                    <button class="btn btn-primary" @onclick="NavigateToBrowseProduct">Go to browse Page</button>
                 </div>
             </div>
-            <div class="row m-2 p-2 border">
-                <div class="col-3">
-                    Category
-                </div>
-                <div class="col-4">
-                    @foreach (var category in productDTO.CategoryPath)
+
+            <EditForm Model="@productDTO" OnValidSubmit="@ValidSubmit">
+                <ValidationSummary></ValidationSummary>
+                <div class="container">
+                    <div class="row m-2 p-2 border">
+                        <div class="col-3">
+                            Product
+                        </div>
+                        <div class="col-4">
+                            <input class="form-control" type="text" @bind="@productDTO.Product.ProductName" />
+                        </div>
+                    </div>
+                    <div class="row m-2 p-2 border">
+                        <div class="col-3">
+                            Category
+                        </div>
+                        <div class="col-4">
+                            @foreach (var category in productDTO.CategoryPath)
+                            {
+                                <label>\ @category</label>
+                            }
+                        </div>
+                    </div>
+                    <div class="row m-2 p-2 border">
+                        <div class="col-3">
+                            Description
+                        </div>
+                        <div class="col-4">
+                            <textarea class="form-control textarea" type="text" rows="8" @bind="@productDTO.Product.ProducDescription" />
+                        </div>
+                    </div>
+                    <div class="row m-2 p-2 border">
+                        <div class="col-3">
+                            Price
+                        </div>
+                        <div class="col-4">
+                            <input class="form-control" type="text" @bind="@productDTO.Product.Price" />
+                        </div>
+                    </div>
+                    <div class="row m-2 p-2 border">
+                        <div class="col-3">
+                            Stock
+                        </div>
+                        <div class="col-4">
+                            <input class="form-control" type="text" @bind="@productDTO.Product.Stock" />
+                        </div>
+                    </div>
+                    <div class="row m-2 p-2 border">
+                        <div class="col-3">
+                            Display on main page
+                        </div>
+                        <div class="col-4">
+                            <div class="form">
+                                <div class="custom-control custom-checkbox">
+                                    <input type="checkbox" class="custom-control-input" id="displayOnIndex" @bind="productDTO.Product.DisplayOnIndex">
+                                    <label class="custom-control-label" for="displayOnIndex"></label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    @foreach (var photo in productDTO.Photos)
                     {
-                        <label>\ @category</label>
-                    }
-                </div>
-            </div>
-            <div class="row m-2 p-2 border">
-                <div class="col-3">
-                    Description
-                </div>
-                <div class="col-4">
-                    <textarea class="form-control textarea" type="text" rows="8" @bind="@productDTO.Product.ProducDescription" />
-                </div>
-            </div>
-            <div class="row m-2 p-2 border">
-                <div class="col-3">
-                    Price
-                </div>
-                <div class="col-4">
-                     <input class="form-control" type="text" @bind="@productDTO.Product.Price" />
-                </div>
-            </div>
-            <div class="row m-2 p-2 border">
-                <div class="col-3">
-                    Stock
-                </div>
-                <div class="col-4">
-                     <input class="form-control" type="text" @bind="@productDTO.Product.Stock" />
-                </div>
-            </div>
-            <div class="row m-2 p-2 border">
-                <div class="col-3">
-                    Display on main page
-                </div>
-                <div class="col-4">
-                    <div class="form">
-                        <div class="custom-control custom-checkbox">
-                            <input type="checkbox" class="custom-control-input" id="displayOnIndex" @bind="productDTO.Product.DisplayOnIndex">
-                            <label class="custom-control-label" for="displayOnIndex"></label>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            @foreach (var photo in productDTO.Photos)
-            {
-                if (photo.MainPhoto)
-                {
-                    <div class="row m-2 p-2 border">
-                        <div class="col-3">
-                            Main Photo
-                        </div>
-                        <div class="col-4">
-                            <Shop.Pages.Component.ImageDisplay Image="photo.Image" Width="100"></Shop.Pages.Component.ImageDisplay>
-                        </div>
-                        <div class="col-5">
-                            <button class="btn btn-danger" width="200px" type="button" @onclick="() => DeletePhoto(photo)">Delete </button>
-                        </div>
-                    </div>
-                }
-            }
-
-            @foreach (var photo in productDTO.Photos)
-            {
-                if (!photo.MainPhoto)
-                {
-                    <div class="row m-2 p-2 border">
-                        <div class="col-3">
-                            Photo
-                        </div>
-                        <div class="col-4">
-                            <Shop.Pages.Component.ImageDisplay Image="photo.Image" Width="100"></Shop.Pages.Component.ImageDisplay>
-                        </div>
-                        <div class="col-5">
-                            <button class="btn btn-danger" width="100%" type="button" @onclick="() => DeletePhoto(photo)">Delete </button>
-                            <button class="btn btn-primary" width="100%" type="button" @onclick="() => SetMainPhoto(photo)">Set as main photo </button>
-                        </div>
-                    </div>
-                }
-            }
-
-            <div class="row m-2 p-2 border">
-                <div class="col-3">
-                    Add new Photo
-                </div>
-                <div class="col-4">
-                    <Shop.Pages.Component.ImageUpload Photo="AddPhoto"></Shop.Pages.Component.ImageUpload>
-                </div>
-            </div>
-
-            @foreach (var item in productDTO.Fields)
-            {
-                <div class="row m-2 p-2 border">
-                    <div class="col-3">
-                        @item.Key.CustomFieldName
-                    </div>
-                    <div class="col-4">
-                        @switch (item.Value)
+                        if (photo.MainPhoto)
                         {
-                            case ProductFieldValueBool productFieldValue:
-                                //a little bit of a HACK here, but it works
-                                if (IncreaseCheckboxId())
-                                {
-                                    <div class="form">
-                                        <div class="custom-control custom-checkbox">
-                                            <input type="checkbox" class="custom-control-input" id="checkbox_@checkboxId" @bind="productFieldValue.Value">
-                                            <label class="custom-control-label" for="checkbox_@checkboxId"></label>
-                                        </div>
-                                    </div>
-                                }
-                                break;
-                            case ProductFieldValueInt productFieldValue:
-                                <input class="form-control" type="text" @bind="@productFieldValue.Value" />
-                                break;
-                            case ProductFieldValueFloat productFieldValue:
-                                <input class="form-control" type="text" @bind="@productFieldValue.Value" />
-                                break;
-                            case ProductFieldValueString productFieldValue:
-                                <input class="form-control" type="text" @bind="@productFieldValue.Value" />
-                                break;
-                            case ProductFieldValueDDI productFieldValue:
-                                <select @bind="productFieldValue.Value" class="form-control">
-                                    @if (true)
-                                    {
-                                        CustomFieldDTO customFieldDto = (CustomFieldDTO)item.Key;
-                                        foreach (var dropDownItem in customFieldDto.DropDownItems)
-                                        {
-                                            <option class="dropdown-item" value="@dropDownItem.DropDownItemName">@dropDownItem.DropDownItemName</option>
-                                        }
-                                    }
-                                </select>
-                                break;
+                            <div class="row m-2 p-2 border">
+                                <div class="col-3">
+                                    Main Photo
+                                </div>
+                                <div class="col-4">
+                                    <Shop.Pages.Component.ImageDisplay Image="photo.Image" Width="100"></Shop.Pages.Component.ImageDisplay>
+                                </div>
+                                <div class="col-5">
+                                    <button class="btn btn-danger" width="200px" type="button" @onclick="() => DeletePhoto(photo)">Delete </button>
+                                </div>
+                            </div>
                         }
+                    }
+
+                    @foreach (var photo in productDTO.Photos)
+                    {
+                        if (!photo.MainPhoto)
+                        {
+                            <div class="row m-2 p-2 border">
+                                <div class="col-3">
+                                    Photo
+                                </div>
+                                <div class="col-4">
+                                    <Shop.Pages.Component.ImageDisplay Image="photo.Image" Width="100"></Shop.Pages.Component.ImageDisplay>
+                                </div>
+                                <div class="col-5">
+                                    <button class="btn btn-danger" width="100%" type="button" @onclick="() => DeletePhoto(photo)">Delete </button>
+                                    <button class="btn btn-primary" width="100%" type="button" @onclick="() => SetMainPhoto(photo)">Set as main photo </button>
+                                </div>
+                            </div>
+                        }
+                    }
+
+                    <div class="row m-2 p-2 border">
+                        <div class="col-3">
+                            Add new Photo
+                        </div>
+                        <div class="col-4">
+                            <Shop.Pages.Component.ImageUpload Photo="AddPhoto"></Shop.Pages.Component.ImageUpload>
+                        </div>
+                    </div>
+
+                    @foreach (var item in productDTO.Fields)
+                    {
+                        <div class="row m-2 p-2 border">
+                            <div class="col-3">
+                                @item.Key.CustomFieldName
+                            </div>
+                            <div class="col-4">
+                                @switch (item.Value)
+                                {
+                                    case ProductFieldValueBool productFieldValue:
+                                        //a little bit of a HACK here, but it works
+                                        if (IncreaseCheckboxId())
+                                        {
+                                            <div class="form">
+                                                <div class="custom-control custom-checkbox">
+                                                    <input type="checkbox" class="custom-control-input" id="checkbox_@checkboxId" @bind="productFieldValue.Value">
+                                                    <label class="custom-control-label" for="checkbox_@checkboxId"></label>
+                                                </div>
+                                            </div>
+                                        }
+                                        break;
+                                    case ProductFieldValueInt productFieldValue:
+                                        <input class="form-control" type="text" @bind="@productFieldValue.Value" />
+                                        break;
+                                    case ProductFieldValueFloat productFieldValue:
+                                        <input class="form-control" type="text" @bind="@productFieldValue.Value" />
+                                        break;
+                                    case ProductFieldValueString productFieldValue:
+                                        <input class="form-control" type="text" @bind="@productFieldValue.Value" />
+                                        break;
+                                    case ProductFieldValueDDI productFieldValue:
+                                        <select @bind="productFieldValue.Value" class="form-control">
+                                            @if (true)
+                                            {
+                                                CustomFieldDTO customFieldDto = (CustomFieldDTO)item.Key;
+                                                foreach (var dropDownItem in customFieldDto.DropDownItems)
+                                                {
+                                                    <option class="dropdown-item" value="@dropDownItem.DropDownItemName">@dropDownItem.DropDownItemName</option>
+                                                }
+                                            }
+                                        </select>
+                                        break;
+                                }
+                            </div>
+                        </div>
+                    }
+                    <div class="col-12 m-5">
+                        <button class="btn btn-primary form-control" type="submit">Submit</button>
                     </div>
                 </div>
-            }
-            <div class="col-12 m-5">
-                <button class="btn btn-primary form-control" type="submit">Submit</button>
-            </div>
-        </div>
-    </EditForm>
-}
+            </EditForm>
+        }
+    </Authorized>
+</AuthorizeView>
 
 @code {
     [Parameter]

@@ -8,91 +8,97 @@
 @inject NavigationManager NavigationManager
 @inject CategoryService categoryService
 
-<div class="container">
-    <div class="container p-3">
-        <div class="row">
-            <div class="col-6">
-                <h3 class="text-primary">@(category == null ? "All Custom Fields" : "Custom Fields of Category " + category.CategoryName)</h3>
-            </div>
-            <div class="container col-6">
-                <button class="btn btn-primary float-right" style="width:250px" @onclick="CreateCustomField">
-                    Add New Custom Field
-                </button>
-                @if (category != null)
-                {
-                    <button class="btn btn-primary float-right" style="width:250px; margin-right:4px" @onclick="() => NavigateToCategory(category.CategoryId)">
-                        Show Category
-                    </button>
-                }
-            </div>
-
-        </div>
-    </div>
-
-    @if (customFields == null)
-    {
-        <p><em>Loading or no customFields exist</em></p>
-    }
-    else
-    {
-        <div class="container border p-3">
-            <div class="row pt-4">
-                <table class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            @if (category == null)
-                            {
-                                <th>Category</th>
-                            }
-                            <th>Field Type</th>
-                            <th>Arguments</th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var customField in customFields)
+<AuthorizeView Roles="admin">
+    <Authorized>
+        <div class="container">
+            <div class="container p-3">
+                <div class="row">
+                    <div class="col-6">
+                        <h3 class="text-primary">@(category == null ? "All Custom Fields" : "Custom Fields of Category " + category.CategoryName)</h3>
+                    </div>
+                    <div class="container col-6">
+                        <button class="btn btn-primary float-right" style="width:250px" @onclick="CreateCustomField">
+                            Add New Custom Field
+                        </button>
+                        @if (category != null)
                         {
-                            <tr>
-                                <td>@customField.CustomFieldName</td>
-                                @if (category == null)
+                            <button class="btn btn-primary float-right" style="width:250px; margin-right:4px" @onclick="() => NavigateToCategory(category.CategoryId)">
+                                Show Category
+                            </button>
+                        }
+                    </div>
+
+                </div>
+            </div>
+
+            @if (customFields == null)
+            {
+                <p><em>Loading or no customFields exist</em></p>
+            }
+            else
+            {
+                <div class="container border p-3">
+                    <div class="row pt-4">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    @if (category == null)
+                                    {
+                                        <th>Category</th>
+                                    }
+                                    <th>Field Type</th>
+                                    <th>Arguments</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var customField in customFields)
                                 {
-                                    <td>@categoryService.GetCategory(customField.CategoryId).CategoryName</td>
-                                }
-                                <td>@customField.FieldType</td>
-                                <td>TODO</td>
-                                <td>
-                                    <div class="container">
+                                    <tr>
+                                        <td>@customField.CustomFieldName</td>
                                         @if (category == null)
                                         {
-                                            <button class="btn btn-primary" style="width:200px" @onclick="() => NavigateToCategory(customField.CategoryId)">
-                                                Show Category
-                                            </button>
+                                            <td>@categoryService.GetCategory(customField.CategoryId).CategoryName</td>
                                         }
-                                        <button class="btn btn-primary" style="width:100px" @onclick="() => EditCustomField(customField)">
-                                            Edit
-                                        </button>
-                                        <button class="btn btn-danger" style="width:100px" @onclick="() => DeleteCustomField(customField)">
-                                            Delete
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
+                                        <td>@customField.FieldType</td>
+                                        <td>TODO</td>
+                                        <td>
+                                            <div class="container">
+                                                @if (category == null)
+                                                {
+                                                    <button class="btn btn-primary" style="width:200px" @onclick="() => NavigateToCategory(customField.CategoryId)">
+                                                        Show Category
+                                                    </button>
+                                                }
+                                                <button class="btn btn-primary" style="width:100px" @onclick="() => EditCustomField(customField)">
+                                                    Edit
+                                                </button>
+                                                <button class="btn btn-danger" style="width:100px" @onclick="() => DeleteCustomField(customField)">
+                                                    Delete
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            }
+            @if (showPopup)
+            {
+                <Shop.Pages.Component.DropDownItemComponent CurrentCustomField="@currentCustomField"
+                                                            Close="ClosePopup"
+                                                            Submit="ValidSubmit"
+                                                            Categories="categories">
+                </Shop.Pages.Component.DropDownItemComponent>
+            }
         </div>
-    }
-    @if (showPopup)
-    {
-        <Shop.Pages.Component.DropDownItemComponent CurrentCustomField="@currentCustomField"
-                                                    Close="ClosePopup"
-                                                    Submit="ValidSubmit"
-                                                    Categories="categories">
-        </Shop.Pages.Component.DropDownItemComponent>
-    }
-</div>
+    </Authorized>
+</AuthorizeView>
+
+
 
 @code {
     [Parameter]

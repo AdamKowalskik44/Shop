@@ -5,104 +5,108 @@
 @inherits OwningComponentBase<ProductService>
 @inject NavigationManager NavigationManager
 
-<div class="container">
-    <div class="container p-3">
-        <div class="row">
-            <div class="col-9">
-                <h3 class="text-primary">Product List</h3>
+<AuthorizeView Roles="admin, moderator">
+    <Authorized>
+        <div class="container">
+            <div class="container p-3">
+                <div class="row">
+                    <div class="col-9">
+                        <h3 class="text-primary">Product List</h3>
+                    </div>
+                    <div class="col-3">
+                        <button class="btn btn-primary form-control" @onclick="OpenPopup">
+                            Add new Product
+                        </button>
+                    </div>
+                </div>
             </div>
-            <div class="col-3">
-                <button class="btn btn-primary form-control" @onclick="OpenPopup">
-                    Add new Product
-                </button>
-            </div>
-        </div>
-    </div>
 
-    @if (products == null)
-    {
-        <p><em>Loading or no products exist</em></p>
-    }
-    else
-    {
-        <div class="container border p-3">
-            <div class="row pt-4">
-                <table class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Category</th>
-                            <th>Description</th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var product in products)
-                        {
-                            <tr>
-                                <td>@product.ProductName</td>
-                                <td>@product.CategoryId</td>
-                                <td>@product.ProducDescription</td>
-                                <td>
-                                    <div class="container">
-                                        <button class="btn btn-primary" style="width:100px" @onclick="() => EditProduct(product)">
-                                            Edit
-                                        </button>
-                                        <button class="btn btn-danger" style="width:100px" @onclick="() => DeleteProduct(product)">
-                                            Delete
+            @if (products == null)
+            {
+                <p><em>Loading or no products exist</em></p>
+            }
+            else
+            {
+                <div class="container border p-3">
+                    <div class="row pt-4">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Category</th>
+                                    <th>Description</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var product in products)
+                                {
+                                    <tr>
+                                        <td>@product.ProductName</td>
+                                        <td>@product.CategoryId</td>
+                                        <td>@product.ProducDescription</td>
+                                        <td>
+                                            <div class="container">
+                                                <button class="btn btn-primary" style="width:100px" @onclick="() => EditProduct(product)">
+                                                    Edit
+                                                </button>
+                                                <button class="btn btn-danger" style="width:100px" @onclick="() => DeleteProduct(product)">
+                                                    Delete
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            }
+        </div>
+        @if (showPopup)
+        {
+            <div class="modal" tabindex="-1" style="display:block" role="dialog">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3>Add new product</h3>
+                            <button type="button" class="close" @onclick="ClosePopup">
+                                <span aria-hidden="true">X</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="container">
+                                <div class="row py-2">
+                                    <div class="col-3">
+                                        Product Category
+                                    </div>
+                                    <div class="col-9">
+                                        <select @bind="newProductCategoryId" class="form-control">
+                                            @foreach (var category in categories)
+                                            {
+                                                <option class="dropdown-item" value="@category.CategoryId">@category.CategoryName</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="row py-2">
+                                    <div class="col-3">
+
+                                    </div>
+                                    <div class="col-6">
+                                        <button class="btn btn-primary" @onclick="CreateProduct">
+                                            Create Product
                                         </button>
                                     </div>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    }
-</div>
-@if (showPopup)
-{
-    <div class="modal" tabindex="-1" style="display:block" role="dialog">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h3>Add new product</h3>
-                    <button type="button" class="close" @onclick="ClosePopup">
-                        <span aria-hidden="true">X</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div class="container">
-                        <div class="row py-2">
-                            <div class="col-3">
-                                Product Category
-                            </div>
-                            <div class="col-9">
-                                <select @bind="newProductCategoryId" class="form-control">
-                                    @foreach (var category in categories)
-                                    {
-                                        <option class="dropdown-item" value="@category.CategoryId">@category.CategoryName</option>
-                                    }
-                                </select>
-                            </div>
-                        </div>
-                        <div class="row py-2">
-                            <div class="col-3">
-                                
-                            </div>
-                            <div class="col-6">
-                                <button class="btn btn-primary" @onclick="CreateProduct">
-                                    Create Product
-                                </button>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
-}
+        }
+    </Authorized>
+</AuthorizeView>
 
 @code {
     private List<Product> products;

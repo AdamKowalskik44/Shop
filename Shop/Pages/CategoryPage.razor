@@ -4,118 +4,119 @@
 @using Shop.Services
 @inherits OwningComponentBase<CategoryService>
 @inject NavigationManager NavigationManager
-
 @* Header + Add New *@
-<div class="container">
-    <div class="container p-3">
-        <div class="row">
-            <div class="col-9">
-                <h3 class="text-primary">Category List</h3>
-            </div>
-            <div class="col-3">
-                <button class="btn btn-primary form-control" @onclick="CreateCategory">
-                    Add New Category
-                </button>
-            </div>
-        </div>
-    </div>
-
-    @if (categories == null)
-    {
-        <p><em>Loading or no categories exist</em></p>
-    }
-    else
-    {
-        <div class="custom-control custom-switch">
-            <a style="margin-right:40px">List View</a>
-            <input type="checkbox" class="custom-control-input" id="customSwitch1" @onclick="ToggleTreeView" />
-            <label class="custom-control-label" for="customSwitch1">Tree View</label>
-            <br>
-        </div>
-        if (showTree)
-        {
-            <ul>
-                <Shop.Pages.Component.CategoryTreeViewComponent 
-                    Categories="@Service.GetRootCategories()"
-                    NavigateToCustomFieldCallback="NavigateToCustomField"
-                    EditCategoryCallback="EditCategory"
-                    DeleteCategoryCallback="DeleteCategory">
-                </Shop.Pages.Component.CategoryTreeViewComponent>
-            </ul>
-        }
-        else
-        {
-            <div class="container border p-3">
-                <div class="row pt-4">
-                    <table class="table table-striped">
-                        <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>Parent Category</th>
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var category in categories)
-                            {
-                                <tr>
-                                    <td>@category.CategoryName</td>
-                                    @if (Service.GetCategory(category.ParentCategoryId) != null)
-                                    {
-                                        <td>@Service.GetCategory(category.ParentCategoryId).CategoryName</td>
-                                    }
-                                    else
-                                    {
-                                        <td>Root Category</td>
-                                    }
-                                    <td>
-                                        <div class="container">
-                                            <button class="btn btn-primary" style="width:200px" @onclick="() => NavigateToCustomField(category)">
-                                                Custom Fields
-                                            </button>
-                                            <button class="btn btn-primary" style="width:100px" @onclick="() => EditCategory(category)">
-                                                Edit
-                                            </button>
-                                            <button class="btn btn-danger" style="width:100px" @onclick="() => DeleteCategory(category)">
-                                                Delete
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        }
-    }
-
-    @if (showPopup)
-    {
-        <Shop.Pages.Component.CategoryComponent 
-            CurrentCategory="@currentCategory"
-            Categories="@categories"
-            ValidSubmit="ValidSubmit"
-            ClosePopup="ClosePopup">
-        </Shop.Pages.Component.CategoryComponent>
-    }
-
-    @if (showPopupWarning)
-        {
-            <div class="modal" tabindex="-1" style="display:block" role="dialog">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h3 class="text-primary">@warningMessage</h3>
-                        </div>
-                        <div class="modal-body">
-                            <button class="btn btn-primary" @onclick="ClosePopupWarning">OK</button>
-                        </div>
+<AuthorizeView Roles="admin">
+    <Authorized>
+        <div class="container">
+            <div class="container p-3">
+                <div class="row">
+                    <div class="col-9">
+                        <h3 class="text-primary">Category List</h3>
+                    </div>
+                    <div class="col-3">
+                        <button class="btn btn-primary form-control" @onclick="CreateCategory">
+                            Add New Category
+                        </button>
                     </div>
                 </div>
             </div>
-        }
-</div>
+
+            @if (categories == null)
+            {
+                <p><em>Loading or no categories exist</em></p>
+            }
+            else
+            {
+                <div class="custom-control custom-switch">
+                    <a style="margin-right:40px">List View</a>
+                    <input type="checkbox" class="custom-control-input" id="customSwitch1" @onclick="ToggleTreeView" />
+                    <label class="custom-control-label" for="customSwitch1">Tree View</label>
+                    <br>
+                </div>
+                if (showTree)
+                {
+                    <ul>
+                        <Shop.Pages.Component.CategoryTreeViewComponent Categories="@Service.GetRootCategories()"
+                                                                        NavigateToCustomFieldCallback="NavigateToCustomField"
+                                                                        EditCategoryCallback="EditCategory"
+                                                                        DeleteCategoryCallback="DeleteCategory">
+                        </Shop.Pages.Component.CategoryTreeViewComponent>
+                    </ul>
+                }
+                else
+                {
+                    <div class="container border p-3">
+                        <div class="row pt-4">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Parent Category</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var category in categories)
+                                    {
+                                        <tr>
+                                            <td>@category.CategoryName</td>
+                                            @if (Service.GetCategory(category.ParentCategoryId) != null)
+                                            {
+                                                <td>@Service.GetCategory(category.ParentCategoryId).CategoryName</td>
+                                            }
+                                            else
+                                            {
+                                                <td>Root Category</td>
+                                            }
+                                            <td>
+                                                <div class="container">
+                                                    <button class="btn btn-primary" style="width:200px" @onclick="() => NavigateToCustomField(category)">
+                                                        Custom Fields
+                                                    </button>
+                                                    <button class="btn btn-primary" style="width:100px" @onclick="() => EditCategory(category)">
+                                                        Edit
+                                                    </button>
+                                                    <button class="btn btn-danger" style="width:100px" @onclick="() => DeleteCategory(category)">
+                                                        Delete
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                }
+            }
+
+            @if (showPopup)
+            {
+                <Shop.Pages.Component.CategoryComponent CurrentCategory="@currentCategory"
+                                                        Categories="@categories"
+                                                        ValidSubmit="ValidSubmit"
+                                                        ClosePopup="ClosePopup">
+                </Shop.Pages.Component.CategoryComponent>
+            }
+
+            @if (showPopupWarning)
+            {
+                <div class="modal" tabindex="-1" style="display:block" role="dialog">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h3 class="text-primary">@warningMessage</h3>
+                            </div>
+                            <div class="modal-body">
+                                <button class="btn btn-primary" @onclick="ClosePopupWarning">OK</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </Authorized>
+</AuthorizeView>
 
 @code {
 

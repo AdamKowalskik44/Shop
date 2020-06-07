@@ -2,57 +2,61 @@
 @using Shop.Services
 @inherits OwningComponentBase<CategoryService>
 
-<div class="modal" tabindex="-1" style="display:block" role="dialog">
-    <EditForm Model="@CurrentCategory" OnValidSubmit="@ValidSubmit">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h3 class="text-info">@(CurrentCategory.CategoryId != 0 ? "Update" : "Create")</h3>
-                    <button type="button" class="close" @onclick="ClosePopup">
-                        <span aria-hidden="true">X</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <DataAnnotationsValidator></DataAnnotationsValidator>
-                    <ValidationSummary></ValidationSummary>
-                    <div class="row">
-                        <div class="col-9">
-                            <div class="row py-2">
-                                <div class="col-4">
-                                    Category Name
-                                </div>
-                                <div class="col-8">
-                                    <input class="form-control" type="text" @bind="CurrentCategory.CategoryName" />
-                                </div>
-                            </div>
-                            <div class="row py-2">
-                                <div class="col-4">
-                                    Parent Category ID
-                                </div>
-                                <div class="col-8">
-                                    <select @bind="CurrentCategory.ParentCategoryId" class="form-control">
-                                        @foreach (var category in Categories)
-                                        {
-                                            <option class="dropdown-item" value="@category.CategoryId" >@category.CategoryName</option>
-                                        }
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="row py-2">
-                                <div class="col-4">
+<AuthorizeView Roles="admin" Context="auth">
+    <Authorized>
+        <div class="modal" tabindex="-1" style="display:block" role="dialog">
+            <EditForm Model="@CurrentCategory" OnValidSubmit="@ValidSubmit">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3 class="text-info">@(CurrentCategory.CategoryId != 0 ? "Update" : "Create")</h3>
+                            <button type="button" class="close" @onclick="ClosePopup">
+                                <span aria-hidden="true">X</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <DataAnnotationsValidator></DataAnnotationsValidator>
+                            <ValidationSummary></ValidationSummary>
+                            <div class="row">
+                                <div class="col-9">
+                                    <div class="row py-2">
+                                        <div class="col-4">
+                                            Category Name
+                                        </div>
+                                        <div class="col-8">
+                                            <input class="form-control" type="text" @bind="CurrentCategory.CategoryName" />
+                                        </div>
+                                    </div>
+                                    <div class="row py-2">
+                                        <div class="col-4">
+                                            Parent Category ID
+                                        </div>
+                                        <div class="col-8">
+                                            <select @bind="CurrentCategory.ParentCategoryId" class="form-control">
+                                                @foreach (var category in Categories)
+                                                {
+                                                    <option class="dropdown-item" value="@category.CategoryId">@category.CategoryName</option>
+                                                }
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="row py-2">
+                                        <div class="col-4">
 
-                                </div>
-                                <div class="col-8">
-                                    <button class="btn btn-primary form-control" type="submit">Submit</button>
+                                        </div>
+                                        <div class="col-8">
+                                            <button class="btn btn-primary form-control" type="submit">Submit</button>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            </EditForm>
         </div>
-    </EditForm>
-</div>
+    </Authorized>
+</AuthorizeView>
 
 @code {
     [Parameter]

@@ -3,42 +3,45 @@
 @inherits OwningComponentBase<CategoryService>
 @inject NavigationManager NavigationManager
 
-@foreach (var category in Categories)
-{
-    <li>
-        <div class="container">
-            <div class="row m-1">
-                <div>
-                    <h6>@category.CategoryName</h6>
-                </div>
-                <div class="col-8">
-                    <div class="container">
-                        <button class="btn btn-primary" style="width:150px" @onclick="() => NavigateToCustomField(category)">
-                            Custom Fields
-                        </button>
-                        <button class="btn btn-primary" style="width:100px" @onclick="() => EditCategory(category)">
-                            Edit
-                        </button>
-                        <button class="btn btn-danger" style="width:100px" @onclick="() => DeleteCategory(category.CategoryId)">
-                            Delete
-                        </button>
+<AuthorizeView Roles="admin" Context="auth">
+    <Authorized>
+        @foreach (var category in Categories)
+        {
+            <li>
+                <div class="container">
+                    <div class="row m-1">
+                        <div>
+                            <h6>@category.CategoryName</h6>
+                        </div>
+                        <div class="col-8">
+                            <div class="container">
+                                <button class="btn btn-primary" style="width:150px" @onclick="() => NavigateToCustomField(category)">
+                                    Custom Fields
+                                </button>
+                                <button class="btn btn-primary" style="width:100px" @onclick="() => EditCategory(category)">
+                                    Edit
+                                </button>
+                                <button class="btn btn-danger" style="width:100px" @onclick="() => DeleteCategory(category.CategoryId)">
+                                    Delete
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </div>
-    </li>
-    @if (Service.GetCategories(category.CategoryId).Count > 0)
-    {
-        <ul class="nested">
-            <Shop.Pages.Component.CategoryTreeViewComponent 
-                Categories="@Service.GetCategories(category.CategoryId)"
-                NavigateToCustomFieldCallback="NavigateToCustomField"
-                EditCategoryCallback="EditCategory"
-                DeleteCategoryCallback="DeleteCategory">
-            </Shop.Pages.Component.CategoryTreeViewComponent>
-        </ul>
-    }
-}
+            </li>
+            @if (Service.GetCategories(category.CategoryId).Count > 0)
+            {
+                <ul class="nested">
+                    <Shop.Pages.Component.CategoryTreeViewComponent Categories="@Service.GetCategories(category.CategoryId)"
+                                                                    NavigateToCustomFieldCallback="NavigateToCustomField"
+                                                                    EditCategoryCallback="EditCategory"
+                                                                    DeleteCategoryCallback="DeleteCategory">
+                    </Shop.Pages.Component.CategoryTreeViewComponent>
+                </ul>
+            }
+        }
+    </Authorized>
+</AuthorizeView>
 
 @code {
     [Parameter]
