@@ -86,10 +86,6 @@
         Task.Run(async () => await GetUserRolesAsync()).Wait();
         //workaround, has to be perfected later
         //System.Threading.Thread.Sleep(1000);
-
-        /*
-        IdentityRole newRole = new IdentityRole("moderator");
-        RoleManager.CreateAsync(newRole); */
     }
 
     private async Task GetUserRolesAsync()

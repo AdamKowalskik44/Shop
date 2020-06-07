@@ -1,0 +1,22 @@
+﻿@page "/SettingPage"
+@using Microsoft.AspNetCore.Identity;
+@inject RoleManager<IdentityRole> RoleManager
+
+<h3>Setting Page</h3>
+<button class="btn btn-primary m-2" @onclick="BuildAdminUserRole">Build Admin User Role</button>
+<button class="btn btn-primary m-2" @onclick="BuildModeratorUserRole">Build Moderator User Role</button>
+
+@code {
+
+    private void BuildAdminUserRole()
+    {
+        IdentityRole admin = new IdentityRole("admin");
+        RoleManager.CreateAsync(admin);
+    }
+
+    private void BuildModeratorUserRole()
+    {
+        IdentityRole moderator = new IdentityRole("moderator");
+        RoleManager.CreateAsync(moderator);
+    }
+}
