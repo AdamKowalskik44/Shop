@@ -19,7 +19,7 @@
             <td>@user.Key.UserName</td>
             <td>@(user.Value == "" ? "user" : user.Value)</td>
             <td>
-                <button class="btn btn-primary" @onclick="() => EditRole(user.Key)">Edit</button>
+                <button class="btn btn-primary" @onclick="() => EditRole(user.Key, user.Value)">Edit</button>
             </td>
         </tr>
     }
@@ -100,9 +100,10 @@
         }
     }
 
-    private void EditRole(IdentityUser user)
+    private void EditRole(IdentityUser user, string role)
     {
         currentUser = user;
+        currentUserRole = role;
         showPopup = true;
     }
 
@@ -115,6 +116,7 @@
             await UserManager.AddToRoleAsync(currentUser, currentUserRole);
         }
         await GetUserRolesAsync();
+        currentUser = null;
         showPopup = false;
     }
 
