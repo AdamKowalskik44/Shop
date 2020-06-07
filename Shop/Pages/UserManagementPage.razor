@@ -1,0 +1,129 @@
+﻿@page "/UserManagement"
+@using Microsoft.AspNetCore.Identity;
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject UserManager<IdentityUser> UserManager
+@inject RoleManager<IdentityRole> RoleManager
+
+<h3>User Management Page</h3>
+
+<table class="table table-striped">
+    <tr>
+        <th>Username</th>
+        <th>Role</th>
+        <th></th>
+    </tr>
+
+    @foreach (var user in Users)
+    {
+        <tr>
+            <td>@user.Key.UserName</td>
+            <td>@(user.Value == "" ? "user" : user.Value)</td>
+            <td>
+                <button class="btn btn-primary" @onclick="() => EditRole(user.Key)">Edit</button>
+            </td>
+        </tr>
+    }
+</table>
+
+@if (showPopup)
+{
+    <div class="modal" tabindex="-1" style="display:block" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3 class="text-info">Update user role</h3>
+                        <button type="button" class="close" @onclick="ClosePopup">
+                            <span aria-hidden="true">X</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-9">
+                                <div class="row py-2">
+                                    <div class="col-4">
+                                        User Name
+                                    </div>
+                                    <div class="col-8">
+                                        @currentUser.UserName
+                                    </div>
+                                </div>
+                                <div class="row py-2">
+                                    <div class="col-4">
+                                        User role
+                                    </div>
+                                    <div class="col-8">
+                                        <select @bind="currentUserRole" class="form-control">
+                                            <option class="dropdown-item" value="user">user</option>
+                                            <option class="dropdown-item" value="moderator">moderator</option>
+                                            <option class="dropdown-item" value="admin">admin</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="row py-2">
+                                    <div class="col-4">
+
+                                    </div>
+                                    <div class="col-8">
+                                        <button class="btn btn-primary form-control" @onclick="ValidSubmit">Submit</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+    </div>
+}
+
+@code {
+    Dictionary<IdentityUser, string> Users;
+    IdentityUser currentUser;
+    bool showPopup = false;
+    string currentUserRole;
+
+    protected override void OnInitialized()
+    {
+        Task.Run(async () => await GetUserRolesAsync()).Wait();
+        //workaround, has to be perfected later
+        //System.Threading.Thread.Sleep(1000);
+
+        /*
+        IdentityRole newRole = new IdentityRole("moderator");
+        RoleManager.CreateAsync(newRole); */
+    }
+
+    private async Task GetUserRolesAsync()
+    {
+        Users = new Dictionary<IdentityUser, string>();
+        List<IdentityUser> users = UserManager.Users.ToList();
+        foreach (IdentityUser user in users)
+        {
+            IList<string> userRoles = await UserManager.GetRolesAsync(user);
+            string roles = String.Join(", ", userRoles);
+            Users.Add(user, roles);
+        }
+    }
+
+    private void EditRole(IdentityUser user)
+    {
+        currentUser = user;
+        showPopup = true;
+    }
+
+    private async void ValidSubmit()
+    {
+        await UserManager.RemoveFromRoleAsync(currentUser, "admin");
+        await UserManager.RemoveFromRoleAsync(currentUser, "moderator");
+        if (currentUserRole == "admin" || currentUserRole == "moderator")
+        {
+            await UserManager.AddToRoleAsync(currentUser, currentUserRole);
+        }
+        await GetUserRolesAsync();
+        showPopup = false;
+    }
+
+    private void ClosePopup()
+    {
+        showPopup = false;
+    }
+}
