@@ -1,5 +1,88 @@
-﻿<h3>CartPage</h3>
+﻿@page "/CartPage"
+@using Shop.Services
+@using Shop.Pages.Component
+@using Shop.Data.ProductTypes
+@using Shop.Data
+@using Microsoft.AspNetCore.Identity
+@inject AuthenticationStateProvider authenticationStateProvider
+@inject NavigationManager navigationManager
+@inject UserManager<IdentityUser> UserManager
+@inject IToastService toastService
+@inherits OwningComponentBase<CartService>
+<h3 style="margin-bottom:50px">Your Cart</h3>
+
+<div class="container">
+    <div class="row">
+        <div class="col-2" style="float:right">
+            <h3>filters</h3>
+        </div>
+        <div class="col-8 row container">
+            @foreach (var product in Products)
+            {
+                <div class="col-11">
+                    <CartProductComponent ProductDTO="product.Key" CartEntry="product.Value"></CartProductComponent>
+                </div>
+                <div class="col-1">
+                    <button class="btn btn-link" @onclick="() => DeleteCartEntry(product.Value)">X</button>
+                </div>
+            }
+        </div>
+        <div class="col-2" style="float:right">
+            <button class="btn btn-primary" style="width:150px; margin:5px" @onclick="SaveCart">Save Changes</button>
+            <button class="btn btn-primary" style="width:150px; margin:5px" @onclick="GoToCheckout">Go to checkout</button>
+        </div>
+    </div>
+</div>
 
 @code {
+    AuthenticationState authstate;
+    Dictionary<ProductDTO, CartEntry> Products;
 
+    protected override void OnInitialized()
+    {
+        Task.Run(async () => authstate = await authenticationStateProvider.GetAuthenticationStateAsync()).Wait();
+        if (authstate.User.Identity.IsAuthenticated)
+        {
+            Products = Service.GetUserCartProducts(UserManager.GetUserId(authstate.User));
+        }
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (!authstate.User.Identity.IsAuthenticated)
+        {
+            navigationManager.NavigateTo("/Identity/Account/Login", true);
+        }
+    }
+
+    private void DeleteCartEntry(CartEntry cartEntry)
+    {
+        if (authstate.User.Identity.IsAuthenticated)
+        {
+            Service.DeleteCartEntry(cartEntry);
+            Products = Service.GetUserCartProducts(UserManager.GetUserId(authstate.User));
+        }
+    }
+
+    private void SaveCart()
+    {
+        if (authstate.User.Identity.IsAuthenticated)
+        {
+            bool result = Service.SaveCart(Products.Values.ToList());
+            if (result)
+            {
+                toastService.ShowSuccess("Changes saved");
+            }
+            else
+            {
+                toastService.ShowWarning("We encountered a problem saving Your cart");
+            }
+        }
+
+    }
+
+    private void GoToCheckout()
+    {
+        navigationManager.NavigateTo("/");
+    }
 }

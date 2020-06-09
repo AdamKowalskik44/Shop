@@ -1,0 +1,40 @@
+﻿@using Shop.Data.ProductTypes
+@using Shop.Data
+@inject NavigationManager navigationManager
+
+<div class="row p-1 m-1 border row">
+    <div class="col-3">
+        @if (ProductDTO.GetMainPhoto() != null)
+        {
+            <ImageDisplay Image="ProductDTO.GetMainPhoto().Image" Width="150"></ImageDisplay>
+        }
+    </div>
+    <div class="d-flex align-items-start flex-column col-9">
+        <div class="mb-auto p-2 container row">
+            <div class="col">
+                <h3><button class="nav-link btn" @onclick="NavigateToProduct">@ProductDTO.Product.ProductName</button></h3>
+            </div>
+            <div class="col float-right">
+                <form>
+                    <input class="m-1 float-right" style="width:150px" type="number" min="1" max=@ProductDTO.Product.Stock @bind="CartEntry.Quantity">
+                </form>
+            </div>
+        </div>
+        <div class="p-2">
+            <h7>@ProductDTO.Product.Price</h7>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public ProductDTO ProductDTO { get; set; }
+
+    [Parameter]
+    public CartEntry CartEntry { get; set; }
+
+    private void NavigateToProduct()
+    {
+        navigationManager.NavigateTo("/Browse/Product/" + ProductDTO.Product.ProductId);
+    }
+}

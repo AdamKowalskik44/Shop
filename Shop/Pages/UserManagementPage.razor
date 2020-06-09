@@ -79,8 +79,6 @@
     </Authorized>
 </AuthorizeView>
 
-
-
 @code {
     Dictionary<IdentityUser, string> Users;
     IdentityUser currentUser;
@@ -90,8 +88,6 @@
     protected override void OnInitialized()
     {
         Task.Run(async () => await GetUserRolesAsync()).Wait();
-        //workaround, has to be perfected later
-        //System.Threading.Thread.Sleep(1000);
     }
 
     private async Task GetUserRolesAsync()

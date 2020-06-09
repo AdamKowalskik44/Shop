@@ -36,7 +36,7 @@
     [Parameter]
     public ProductDTO Product { get; set; }
 
-    private int cartQuantity;
+    private int cartQuantity = 1;
 
     private async void AddToCart()
     {
@@ -52,7 +52,7 @@
         }
         else
         {
-            navigationManager.NavigateTo("/Identity/Account/Login");
+            navigationManager.NavigateTo("/Identity/Account/Login", true);
         }
     }
 
