@@ -48,6 +48,7 @@ namespace Shop
             services.AddScoped<ProductService>();
             services.AddScoped<CartService>();
             services.AddScoped<AddressService>();
+            services.AddScoped<OrderService>();
             services.AddBlazoredToast();
         }
 

@@ -3,7 +3,9 @@
 @using Shop.Data.ProductTypes
 @using Shop.Services
 @using Microsoft.AspNetCore.Identity
+@using System.Text
 @inject CartService cartService
+@inject OrderService orderService
 @inject AuthenticationStateProvider authenticationStateProvider
 @inject NavigationManager navigationManager
 @inject UserManager<IdentityUser> userManager
@@ -110,24 +112,27 @@ else
                         <h4>Confirm Your Order</h4>
                     </div>
                     <div class="modal-body">
+                        <h5>Products:</h5>
                         @foreach (var product in products)
                         {
                             <p>
-                                @product.Key.Product.ProductName X @product.Value.Quantity
+                                @product.Key.Product.ProductName x @product.Value.Quantity (Total: @(product.Key.Product.Price * product.Value.Quantity))
                             </p>
                         }
                         <br />
-                        <p>Delivery address:</p>
-                        <p>@address.Number &nbsp; @address.LastName</p>
+                        <p>Total: @CalculateTotal()</p>
+                        <br />
+                        <h5>Delivery address:</h5>
+                        <p>@address.Name @address.LastName</p>
                         @if (address.Number2 == string.Empty)
                         {
-                            <p>@address.Street &nbsp; @address.Number</p>
+                            <p>@address.Street @address.Number</p>
                         }
                         else
                         {
-                            <p>@address.Street &nbsp; @address.Number &nbsp; / &nbsp; @address.Number2</p>
+                            <p>@address.Street @address.Number / @address.Number2</p>
                         }
-                        <p>@address.City &nbsp; @address.PostalCode</p>
+                        <p>@address.City @address.PostalCode</p>
                         <p>@address.PhoneNumber</p>
                         <div class="row m-1">
                             <div class="col-6">
@@ -157,7 +162,11 @@ else
         if (authstate.User.Identity.IsAuthenticated)
         {
             isCartEmpty = cartService.IsCartEmpty(userManager.GetUserId(authstate.User));
-            address = new Address();
+            address = Service.GetUserCurrentAddress(userManager.GetUserId(authstate.User));
+            if (address == null)
+            {
+                address = new Address();
+            }
         }
     }
 
@@ -186,6 +195,86 @@ else
 
     private void PlaceOrder()
     {
+        Task.Run(async () => authstate = await authenticationStateProvider.GetAuthenticationStateAsync()).Wait();
+        if (authstate.User.Identity.IsAuthenticated)
+        {
+            Order newOrder = new Order();
+            newOrder.OrderId = 0;
+            newOrder.TotalAmount = CalculateTotal();
+            newOrder.AmountPaid = 0;
+            newOrder.isPaid = false;
+            newOrder.ProductListHTML = BuildProductListHTML();
+            newOrder.UserId = userManager.GetUserId(authstate.User);
 
+            Order order = orderService.CreateOrder(newOrder);
+            if (order != null)
+            {
+                address.AddressId = 0;
+                address.OrderId = order.OrderId;
+                if (address.CurrentAddress)
+                {
+                    address.UserId = userManager.GetUserId(authstate.User);
+                }
+                bool success = Service.CreateAddress(address);
+                if (success)
+                {
+                    foreach (var product in products)
+                    {
+                        cartService.DeleteCartEntry(product.Value);
+                    }
+                    navigationManager.NavigateTo("/PaymentPage/" + order.OrderId);
+                }
+            }
+        }
+    }
+
+    private float CalculateTotal()
+    {
+        float result = 0;
+        foreach (var product in products)
+        {
+            result += product.Key.Product.Price * product.Value.Quantity;
+        }
+        return result;
+    }
+
+    private string BuildProductListHTML()
+    {
+        StringBuilder sb = new StringBuilder(string.Empty);
+
+        foreach (var product in products)
+        {
+            sb.Append(product.Key.Product.ProductName + " x " + product.Value.Quantity + "<br />");
+            sb.Append("&emsp;Price per unit: " + product.Key.Product.Price + "<br />");
+            sb.Append("&emsp;Price total: " + (product.Key.Product.Price * product.Value.Quantity) + "<br />");
+            sb.Append("&emsp;Description: " + product.Key.Product.ProducDescription + "<br />");
+            foreach (var customField in product.Key.Fields)
+            {
+                sb.Append("&emsp;" + customField.Key.CustomFieldName + ": ");
+                switch (customField.Value)
+                {
+                    case ProductFieldValueBool productFieldValue:
+                        sb.Append(productFieldValue.Value);
+                        break;
+                    case ProductFieldValueInt productFieldValue:
+                        sb.Append(productFieldValue.Value);
+                        break;
+                    case ProductFieldValueFloat productFieldValue:
+                        sb.Append(productFieldValue.Value);
+                        break;
+                    case ProductFieldValueString productFieldValue:
+                        sb.Append(productFieldValue.Value);
+                        break;
+                    case ProductFieldValueDDI productFieldValue:
+                        sb.Append(productFieldValue.Value);
+                        break;
+                }
+                sb.Append("<br />");
+
+            }
+            sb.Append("<br />");
+        }
+
+        return sb.ToString();
     }
 }

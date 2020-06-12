@@ -36,5 +36,6 @@ namespace Shop.Data
         public DbSet<Photo> Photos { get; set; }
         public DbSet<CartEntry> CartEntries { get; set; }
         public DbSet<Address> Addresses { get; set; }
+        public DbSet<Order> Orders { get; set; }
     }
 }
