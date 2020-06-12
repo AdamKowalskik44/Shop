@@ -1,0 +1,191 @@
+﻿@page "/AddressPage"
+@using Shop.Data
+@using Shop.Data.ProductTypes
+@using Shop.Services
+@using Microsoft.AspNetCore.Identity
+@inject CartService cartService
+@inject AuthenticationStateProvider authenticationStateProvider
+@inject NavigationManager navigationManager
+@inject UserManager<IdentityUser> userManager
+@inherits OwningComponentBase<AddressService>
+
+@if (isCartEmpty)
+{
+    <h3>Your cart is empty :(</h3>
+}
+else
+{
+    <h3 style="margin-bottom:100px">Delivery Address</h3>
+
+    <EditForm Model="@address" OnValidSubmit="@ValidSubmit">
+        <DataAnnotationsValidator></DataAnnotationsValidator>
+        <ValidationSummary></ValidationSummary>
+        <div class="row" style="margin-bottom:50px">
+            <div class="col-6">
+                <div class="row">
+                    <div class="col-3 m-1">
+                        Name:
+                    </div>
+                    <div class="col-8 m-1">
+                        <input class="form-control" type="text" @bind="address.Name" />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-3 m-1">
+                        Street:
+                    </div>
+                    <div class="col-8 m-1">
+                        <input class="form-control" type="text" @bind="address.Street" />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-3 m-1">
+                        City:
+                    </div>
+                    <div class="col-8 m-1">
+                        <input class="form-control" type="text" @bind="address.City" />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-3 m-1">
+                        Phone Number:
+                    </div>
+                    <div class="col-8 m-1">
+                        <input class="form-control" type="text" @bind="address.PhoneNumber" />
+                    </div>
+                </div>
+            </div>
+            <div class="col-6">
+                <div class="row">
+                    <div class="col-3 m-1">
+                        Last Name:
+                    </div>
+                    <div class="col-8 m-1">
+                        <input class="form-control" type="text" @bind="address.LastName" />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-3 m-1">
+                        Number:
+                    </div>
+                    <div class="col-2 m-1">
+                        <input class="form-control" type="text" @bind="address.Number" />
+                    </div>
+                    /
+                    <div class="col-2 m-1">
+                        <input class="form-control" type="text" @bind="address.Number2" />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-3 m-1">
+                        Postal Code:
+                    </div>
+                    <div class="col-8 m-1">
+                        <input class="form-control" type="text" @bind="address.PostalCode" />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-4">
+
+                    </div>
+                    <div class="custom-control custom-checkbox col-7 m-1">
+                        <input type="checkbox" class="custom-control-input" id="customCheck1" @bind="address.CurrentAddress">
+                        <label class="custom-control-label" for="customCheck1">Mark as My current address</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <button class="btn btn-primary" style="width:100%" type="submit">Next</button>
+            </div>
+        </div>
+    </EditForm>
+    @if (showpopup)
+    {
+        <div class="modal" tabindex="-1" style="display:block" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4>Confirm Your Order</h4>
+                    </div>
+                    <div class="modal-body">
+                        @foreach (var product in products)
+                        {
+                            <p>
+                                @product.Key.Product.ProductName X @product.Value.Quantity
+                            </p>
+                        }
+                        <br />
+                        <p>Delivery address:</p>
+                        <p>@address.Number &nbsp; @address.LastName</p>
+                        @if (address.Number2 == string.Empty)
+                        {
+                            <p>@address.Street &nbsp; @address.Number</p>
+                        }
+                        else
+                        {
+                            <p>@address.Street &nbsp; @address.Number &nbsp; / &nbsp; @address.Number2</p>
+                        }
+                        <p>@address.City &nbsp; @address.PostalCode</p>
+                        <p>@address.PhoneNumber</p>
+                        <div class="row m-1">
+                            <div class="col-6">
+                                <button class="btn btn-warning" style="width:100%" @onclick="ClosePopup">Back</button>
+                            </div>
+                            <div class="col-6">
+                                <button class="btn btn-success" style="width:100%" @onclick="PlaceOrder">Place Order</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+}
+
+@code {
+    Address address;
+    AuthenticationState authstate;
+    Dictionary<ProductDTO, CartEntry> products;
+    bool isCartEmpty;
+    bool showpopup = false;
+
+    protected override void OnInitialized()
+    {
+        Task.Run(async () => authstate = await authenticationStateProvider.GetAuthenticationStateAsync()).Wait();
+        if (authstate.User.Identity.IsAuthenticated)
+        {
+            isCartEmpty = cartService.IsCartEmpty(userManager.GetUserId(authstate.User));
+            address = new Address();
+        }
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (!authstate.User.Identity.IsAuthenticated)
+        {
+            navigationManager.NavigateTo("/Identity/Account/Login", true);
+        }
+    }
+
+    private void ValidSubmit()
+    {
+        Task.Run(async () => authstate = await authenticationStateProvider.GetAuthenticationStateAsync()).Wait();
+        if (authstate.User.Identity.IsAuthenticated)
+        {
+            products = cartService.GetUserCartProducts(userManager.GetUserId(authstate.User));
+            showpopup = true;
+        }
+    }
+
+    private void ClosePopup()
+    {
+        showpopup = false;
+    }
+
+    private void PlaceOrder()
+    {
+
+    }
+}

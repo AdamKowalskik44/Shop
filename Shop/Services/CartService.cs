@@ -103,5 +103,18 @@ namespace Shop.Services
 
             return result;
         }
+
+        public bool IsCartEmpty(string userId)
+        {
+            List<CartEntry> cartEntries = _db.CartEntries.ToList();
+            foreach (var item in cartEntries)
+            {
+                if (item.UserId == userId)
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
     }
 }
