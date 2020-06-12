@@ -40,6 +40,11 @@ namespace Shop.Services
             return _db.Addresses.FirstOrDefault(u => u.UserId == userId && u.CurrentAddress);
         }
 
+        public Address GetAddress(int orderId)
+        {
+            return _db.Addresses.FirstOrDefault(u => u.OrderId == orderId);
+        }
+
         private bool RetireOldAddresses(Address address)
         {
             try

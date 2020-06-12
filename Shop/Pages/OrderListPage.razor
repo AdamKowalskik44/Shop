@@ -1,0 +1,176 @@
+﻿@page "/OrderListPage"
+@using Shop.Data
+@using Shop.Data.ProductTypes
+@using Shop.Data.Enums
+@using Shop.Services
+@using Microsoft.AspNetCore.Identity
+@using System.Text
+@inject CartService cartService
+@inject AddressService addressService
+@inject AuthenticationStateProvider authenticationStateProvider
+@inject NavigationManager navigationManager
+@inject UserManager<IdentityUser> userManager
+@inherits OwningComponentBase<OrderService>
+
+@if (activeOrders.Count == 0)
+{
+    <h4>You have no active orders</h4>
+}
+else
+{
+    <h4>Your active orders:</h4>
+    <table class="table table-striped">
+        <tr>
+            <th>Order number</th>
+            <th>Total Amount</th>
+            <th>Amount Paid</th>
+            <th>Order Status</th>
+            <th></th>
+        </tr>
+
+        @foreach (var order in activeOrders)
+        {
+            <tr>
+                <td>@order.OrderId</td>
+                <td>@order.TotalAmount</td>
+                @if (order.isPaid)
+                {
+                    <td>Fully Paid</td>
+                }
+                else
+                {
+                    <td>@order.AmountPaid</td>
+                }
+                <td>@order.OrderStatus.ToString()</td>
+                <td>
+                    <button class="btn btn-primary" @onclick="() => ShowDetails(order)">Show Details</button>
+                    @if (!order.isPaid)
+                    {
+                        <button class="btn btn-primary" @onclick="() => GoToPayment(order)">Pay For Order</button>
+                    }
+                </td>
+            </tr>
+        }
+    </table>
+}
+<br />
+@if (archiveOrders.Count == 0)
+{
+    <h4>You have no archive orders</h4>
+}
+else
+{
+    <h4>Your archive orders:</h4>
+    <table class="table table-striped">
+        <tr>
+            <th>Order number</th>
+            <th>Total Amount</th>
+            <th>Order Status</th>
+            <th></th>
+        </tr>
+
+        @foreach (var order in archiveOrders)
+        {
+            <tr>
+                <td>@order.OrderId</td>
+                <td>@order.TotalAmount</td>
+                <td>@order.OrderStatus.ToString()</td>
+                <td>
+                    <button class="btn btn-primary" @onclick="() => ShowDetails(order)">Show Details</button>
+                </td>
+            </tr>
+        }
+    </table>
+}
+
+@if (showpopup)
+{
+    <div class="modal" tabindex="-1" style="display:block" role="dialog" sc>
+        <div class="modal-dialog modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5>Order ID: @currentOrder.OrderId</h5>
+                </div>
+                <div class="modal-body">
+                    <h5>Products:</h5>
+                    @((MarkupString)currentOrder.ProductListHTML)
+                    <br />
+                    <p>Total: @currentOrder.TotalAmount</p>
+                    <p>Amount Paid: @currentOrder.AmountPaid</p>
+                    @if (currentOrder.isPaid)
+                    {
+                        <p>Fully paid</p>
+                    }
+                    else
+                    {
+                        <p>Not fully paid</p>
+                    }
+                    <br />
+                    <h5>Delivery address:</h5>
+                    <p>@address.Name @address.LastName</p>
+                    @if (address.Number2 == string.Empty)
+                    {
+                        <p>@address.Street @address.Number</p>
+                    }
+                    else
+                    {
+                        <p>@address.Street @address.Number / @address.Number2</p>
+                    }
+                    <p>@address.City @address.PostalCode</p>
+                    <p>@address.PhoneNumber</p>
+                    <h5>Order status: @currentOrder.OrderStatus.ToString()</h5>
+                    <div class="row m-1">
+                        <div class="col-12">
+                            <button class="btn btn-warning" style="width:100%" @onclick="ClosePopup">Back</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    List<Order> activeOrders;
+    List<Order> archiveOrders;
+    AuthenticationState authstate;
+    Address address;
+    Order currentOrder;
+    bool showpopup = false;
+
+    protected override void OnInitialized()
+    {
+        Task.Run(async () => authstate = await authenticationStateProvider.GetAuthenticationStateAsync()).Wait();
+        if (authstate.User.Identity.IsAuthenticated)
+        {
+            activeOrders = Service.GetActiveOrders(userManager.GetUserId(authstate.User));
+            archiveOrders = Service.GetArchiveOrders(userManager.GetUserId(authstate.User));
+        }
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (!authstate.User.Identity.IsAuthenticated)
+        {
+            navigationManager.NavigateTo("/Identity/Account/Login", true);
+        }
+    }
+
+    private void ShowDetails(Order order)
+    {
+        address = addressService.GetAddress(order.OrderId);
+        currentOrder = order;
+        showpopup = true;
+    }
+
+    private void ClosePopup()
+    {
+        showpopup = false;
+        currentOrder = null;
+    }
+
+    private void GoToPayment(Order order)
+    {
+        navigationManager.NavigateTo("/PaymentPage/" + order.OrderId);
+    }
+}

@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Shop.Data.Enums;
 using System.Threading.Tasks;
 
 namespace Shop.Services
@@ -27,6 +28,38 @@ namespace Shop.Services
                 return null;
             }
             return order;
+        }
+
+        public List<Order> GetActiveOrders(string userId)
+        {
+            List<Order> orders = _db.Orders.ToList();
+            List<Order> result = new List<Order>();
+
+            foreach (var order in orders)
+            {
+                if (order.UserId == userId && order.OrderStatus != OrderStatus.sent)
+                {
+                    result.Add(order);
+                }
+            }
+
+            return result;
+        }
+
+        public List<Order> GetArchiveOrders(string userId)
+        {
+            List<Order> orders = _db.Orders.ToList();
+            List<Order> result = new List<Order>();
+
+            foreach (var order in orders)
+            {
+                if (order.UserId == userId && order.OrderStatus == OrderStatus.sent)
+                {
+                    result.Add(order);
+                }
+            }
+
+            return result;
         }
     }
 }
