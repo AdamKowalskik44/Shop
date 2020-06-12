@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Shop.Data.Enums;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -30,5 +31,7 @@ namespace Shop.Data
 
         [ForeignKey("UserId")]
         public virtual IdentityUser User { get; set; }
+
+        public OrderStatus OrderStatus { get; set; }
     }
 }

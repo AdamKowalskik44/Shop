@@ -1,6 +1,7 @@
 ﻿@page "/AddressPage"
 @using Shop.Data
 @using Shop.Data.ProductTypes
+@using Shop.Data.Enums 
 @using Shop.Services
 @using Microsoft.AspNetCore.Identity
 @using System.Text
@@ -205,6 +206,7 @@ else
             newOrder.isPaid = false;
             newOrder.ProductListHTML = BuildProductListHTML();
             newOrder.UserId = userManager.GetUserId(authstate.User);
+            newOrder.OrderStatus = OrderStatus.placed;
 
             Order order = orderService.CreateOrder(newOrder);
             if (order != null)
