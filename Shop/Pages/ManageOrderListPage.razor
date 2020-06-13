@@ -1,0 +1,212 @@
+﻿@page "/OrderListPage"
+@using Shop.Data
+@using Shop.Data.Enums
+@using Shop.Services
+@using Microsoft.AspNetCore.Identity
+@inject CartService cartService
+@inject AddressService addressService
+@inject AuthenticationStateProvider authenticationStateProvider
+@inject NavigationManager navigationManager
+@inject UserManager<IdentityUser> userManager
+@inherits OwningComponentBase<OrderService>
+
+<AuthorizeView Roles="admin, moderator">
+    <Authorized>
+        <div class="row" style="margin-bottom:30px">
+            <div class="col-4">
+                <button class="btn btn-primary" style="width:100%" @onclick="ShowActiveOrders">Show active orders</button>
+            </div>
+            <div class="col-4">
+                <button class="btn btn-primary" style="width:100%" @onclick="ShowArchiveOrders">Show archive orders</button>
+            </div>
+            <div class="col-4">
+                <button class="btn btn-primary" style="width:100%" @onclick="ShowAllOrders">Show all orders</button>
+            </div>
+        </div>
+        @if (orders.Count == 0)
+        {
+            if (showActiveOrders)
+            {
+                <h4>There are no active orders</h4>
+            }
+            if (showArchiveOrders)
+            {
+                <h4>There are no archive orders</h4>
+            }
+        }
+        else
+        {
+            <h4>Your active orders:</h4>
+            <table class="table table-striped">
+                <tr>
+                    <th>Order number</th>
+                    <th>Total Amount</th>
+                    <th>Amount Paid</th>
+                    <th>User</th>
+                    <th>Order Status</th>
+                    <th></th>
+                </tr>
+
+                @foreach (var order in orders)
+                {
+                    @if (showActiveOrders && order.OrderStatus != OrderStatus.sent || showArchiveOrders && order.OrderStatus == OrderStatus.sent)
+                    {
+                        <tr>
+                            <td>@order.OrderId</td>
+                            <td>@order.TotalAmount</td>
+                            @if (order.isPaid)
+                            {
+                                <td>Fully Paid</td>
+                            }
+                            else
+                            {
+                                <td>@order.AmountPaid</td>
+                            }
+                            <td>@getUserName(order)</td>
+                            <td>@order.OrderStatus.ToString()</td>
+                            <td>
+                                <div class="row">
+                                    <div class="col-6">
+                                        <button class="btn btn-primary" style="width:100px" @onclick="() => ShowDetails(order)">Show Details</button>
+                                    </div>
+                                    <div class="col-6">
+                                        <button class="btn btn-primary" style="width:100px" @onclick="() => ChangeStatus(order)">Change Status</button>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+            </table>
+        }
+
+        @if (showpopup)
+        {
+            <div class="modal" tabindex="-1" style="display:block" role="dialog" sc>
+                <div class="modal-dialog modal-dialog-scrollable">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5>Order ID: @currentOrder.OrderId</h5>
+                            <br />
+                            <h5>User: @getUserName(currentOrder)</h5>
+                        </div>
+                        <div class="modal-body">
+                            <h5>Products:</h5>
+                            @((MarkupString)currentOrder.ProductListHTML)
+                            <br />
+                            <p>Total: @currentOrder.TotalAmount</p>
+                            <p>Amount Paid: @currentOrder.AmountPaid</p>
+                            @if (currentOrder.isPaid)
+                            {
+                                <p>Fully paid</p>
+                            }
+                            else
+                            {
+                                <p>Not fully paid</p>
+                            }
+                            <br />
+                            <h5>Delivery address:</h5>
+                            <p>@address.Name @address.LastName</p>
+                            @if (address.Number2 == string.Empty)
+                            {
+                                <p>@address.Street @address.Number</p>
+                            }
+                            else
+                            {
+                                <p>@address.Street @address.Number / @address.Number2</p>
+                            }
+                            <p>@address.City @address.PostalCode</p>
+                            <p>@address.PhoneNumber</p>
+                            <h5>Order status: @currentOrder.OrderStatus.ToString()</h5>
+                            <div class="row border">
+                                <div class="col-3">
+                                    New Status:
+                                </div>
+                                <div class="col-8" style="margin:10px">
+                                    <select @bind="@currentOrder.OrderStatus" class="form-control">
+                                        @foreach (OrderStatus orderStatus in Enum.GetValues(typeof(OrderStatus)))
+                                        {
+                                            <option class="dropdown-item" value="@orderStatus">@orderStatus</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row m-1">
+                                <div class="col-6">
+                                    <button class="btn btn-warning" style="width:100%" @onclick="ClosePopup">Back</button>
+                                </div>
+                                <div class="col-6">
+                                    <button class="btn btn-success" style="width:100%" @onclick="() => ChangeStatus(currentOrder)">Confirm status</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </Authorized>
+    <NotAuthorized>
+        <h4>You are not authorized to view this page</h4>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    List<Order> orders;
+    Address address;
+    Order currentOrder;
+    bool showpopup = false;
+    bool showArchiveOrders = false;
+    bool showActiveOrders = true;
+    string userName;
+
+    protected override void OnInitialized()
+    {
+        orders = Service.GetAllOrders();
+    }
+
+    private void ShowDetails(Order order)
+    {
+        address = addressService.GetAddress(order.OrderId);
+        currentOrder = order;
+        showpopup = true;
+    }
+
+    private void ClosePopup()
+    {
+        showpopup = false;
+        currentOrder = null;
+    }
+
+    private void ChangeStatus(Order order)
+    {
+        Service.UpdateStatus(order);
+        showpopup = false;
+        orders = Service.GetAllOrders();
+    }
+
+    private void ShowActiveOrders()
+    {
+        showArchiveOrders = false;
+        showActiveOrders = true;
+    }
+
+    private void ShowArchiveOrders()
+    {
+        showArchiveOrders = true;
+        showActiveOrders = false;
+    }
+
+    private void ShowAllOrders()
+    {
+        showArchiveOrders = true;
+        showActiveOrders = true;
+    }
+
+    private string getUserName(Order order)
+    {
+        IdentityUser user = new IdentityUser();
+        Task.Run(async () => user = await userManager.FindByIdAsync(order.UserId)).Wait();
+        string result = user.Email;
+        return result;
+    }
+}

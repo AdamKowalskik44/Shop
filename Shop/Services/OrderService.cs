@@ -61,5 +61,48 @@ namespace Shop.Services
 
             return result;
         }
+
+        public List<Order> GetAllActiveOrders()
+        {
+            List<Order> orders = _db.Orders.ToList();
+            List<Order> result = new List<Order>();
+
+            foreach (var order in orders)
+            {
+                if (order.OrderStatus != OrderStatus.sent)
+                {
+                    result.Add(order);
+                }
+            }
+
+            return result;
+        }
+
+        public List<Order> GetAllOrders()
+        {
+            return _db.Orders.ToList();
+        }
+
+        public bool UpdateStatus(Order order)
+        {
+            try
+            {
+                var existingOrder = _db.Orders.FirstOrDefault(u => u.OrderId == order.OrderId);
+                if (existingOrder != null)
+                {
+                    existingOrder.OrderStatus = order.OrderStatus;
+                    _db.SaveChanges();
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+            return true;
+        }
     }
 }
