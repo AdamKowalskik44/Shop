@@ -62,25 +62,14 @@ namespace Shop.Services
             return result;
         }
 
-        public List<Order> GetAllActiveOrders()
-        {
-            List<Order> orders = _db.Orders.ToList();
-            List<Order> result = new List<Order>();
-
-            foreach (var order in orders)
-            {
-                if (order.OrderStatus != OrderStatus.sent)
-                {
-                    result.Add(order);
-                }
-            }
-
-            return result;
-        }
-
         public List<Order> GetAllOrders()
         {
             return _db.Orders.ToList();
+        }
+
+        public Order GetOrder(int orderId)
+        {
+            return _db.Orders.FirstOrDefault(u => u.OrderId == orderId);
         }
 
         public bool UpdateStatus(Order order)
@@ -91,6 +80,8 @@ namespace Shop.Services
                 if (existingOrder != null)
                 {
                     existingOrder.OrderStatus = order.OrderStatus;
+                    existingOrder.AmountPaid = order.AmountPaid;
+                    existingOrder.isPaid = order.isPaid;
                     _db.SaveChanges();
                 }
                 else
@@ -103,6 +94,30 @@ namespace Shop.Services
                 return false;
             }
             return true;
+        }
+
+        public Order UpdateStatusWhileCreatingPayment(Order order)
+        {
+            var existingOrder = _db.Orders.FirstOrDefault(u => u.OrderId == order.OrderId);
+            try
+            {
+                if (existingOrder != null)
+                {
+                    existingOrder.OrderStatus = order.OrderStatus;
+                    existingOrder.AmountPaid = order.AmountPaid;
+                    existingOrder.isPaid = order.isPaid;
+                    _db.SaveChanges();
+                }
+                else
+                {
+                    return null;
+                }
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+            return existingOrder;
         }
     }
 }

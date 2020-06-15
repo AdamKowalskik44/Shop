@@ -1,0 +1,259 @@
+﻿@page "/PaymentPage"
+@page "/PaymentPage/{OrderId}"
+@using Shop.Data
+@using Shop.Services
+@using Microsoft.AspNetCore.Identity
+@using Shop.Data.Enums
+@inject AuthenticationStateProvider authenticationStateProvider
+@inject UserManager<IdentityUser> userManager
+@inject OrderService orderService
+@inject NavigationManager navigationManager
+@inherits OwningComponentBase<PaymentService>
+
+@if (order == null)
+{
+    <h4>Order not found, or You are not authorized to view this page.</h4>
+}
+else
+{
+    <div class="m-1">
+        <div class="row m-1">
+            <div class="col-9">
+                <h5>Order number @order.OrderId</h5>
+            </div>
+            <div class="col-3">
+                <button class="btn btn-primary" style="width:100%" @onclick="NavigateToOrder">Go to order</button>
+            </div>
+        </div>
+        <div class="row m-1">
+            <div class="col-9">
+                <h5>Order status: @order.OrderStatus.ToString()</h5>
+            </div>
+            <div class="col-3">
+                @if (order.OrderStatus == OrderStatus.partlyPaid || order.OrderStatus == OrderStatus.placed)
+                {
+                    <button class="btn btn-primary" style="width:100%" @onclick="ShowAddPaymentPopup">Pay for order</button>
+                }
+            </div>
+        </div>
+        @if (order.AmountPaid < order.TotalAmount)
+        {
+            <div class="row m-1">
+            <div class="col-9">
+                <h5>Amount payed: @order.AmountPaid out of @order.TotalAmount</h5>
+            </div>
+        </div>
+        }
+    </div>
+    @if (payments.Count > 1)
+    {
+        <div class="m-4">
+            <h5>Received Payments:</h5>
+            <table class="table table-striped">
+                <tr>
+                    <th>Transfer Title</th>
+                    <th>Transfer Value</th>
+                    <th>Transfer Date</th>
+                    <th></th>
+                </tr>
+
+                @foreach (var payment in payments)
+                {
+                    <tr>
+                        <td>@payment.TransferTitle</td>
+                        <td>@payment.TransferValue</td>
+                        <td>@payment.TransferReceivedDate.ToString()</td>
+                        <td>
+                            <button class="btn btn-primary" @onclick="() => ShowDetailsPopup(payment)">Show Details</button>
+                        </td>
+                    </tr>
+                }
+            </table>
+        </div>
+    }
+
+    @if (showDetailsPopup)
+    {
+        <div class="modal" tabindex="-1" style="display:block" role="dialog" sc>
+            <div class="modal-dialog modal-dialog-scrollable">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5>Payment details:</h5>
+                    </div>
+                    <div class="modal-body">
+                        <p>Sender information: @currentPayment.SenderInfo</p>
+                        <p>Sender account number: @currentPayment.SenderAccountNumber</p>
+                        <p>Sender bank information: @currentPayment.SenderBankInfo</p>
+                        <p>Transfer title: @currentPayment.TransferTitle</p>
+                        <p>Transfer Value: @currentPayment.TransferValue</p>
+                        <p>Transfer sent: @currentPayment.TransferDate</p>
+                        <p>Transfer Received: @currentPayment.TransferReceivedDate</p>
+                        <p>Bank operation number: @currentPayment.BankOperationNumber</p>
+                        <div class="row m-1">
+                            <div class="col-12">
+                                <button class="btn btn-warning" style="width:100%" @onclick="ClosePopups">Back</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    @if (showAddPaymentPopup)
+    {
+        <EditForm Model="@newPayment" OnValidSubmit="@ValidSubmit">
+            <div class="modal" tabindex="-1" style="display:block" role="dialog" sc>
+                <div class="modal-dialog modal-dialog-scrollable">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5>Add Payment</h5>
+                        </div>
+                        <div class="modal-body">
+                            <p style="color:red">PLACEHOLDER: This window is a temporary solution for presentation purposes</p>
+                            <p style="color:red">
+                                In normally deployed application, here would be a component that allows you to pay for purchases, it would return the data requiered below.
+                            </p>
+                            <DataAnnotationsValidator></DataAnnotationsValidator>
+                            <ValidationSummary></ValidationSummary>
+                            <div>
+                                <div class="row">
+                                    <div class="col-6">
+                                        Sender Information:
+                                        <input class="form-control" type="text" @bind="newPayment.SenderInfo" />
+                                    </div>
+                                    <div class="col-6">
+                                        Sender Account Number:
+                                        <input class="form-control" type="text" @bind="newPayment.SenderAccountNumber" />
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-6">
+                                        Sender Bank Information:
+                                        <input class="form-control" type="text" @bind="newPayment.SenderBankInfo" />
+                                    </div>
+                                    <div class="col-6">
+                                        Transfer Title:
+                                        <input class="form-control" type="text" @bind="newPayment.TransferTitle" />
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-6">
+                                        Transfer Value:
+                                        <input class="form-control" type="text" @bind="newPayment.TransferValue" />
+                                    </div>
+                                    <div class="col-6">
+                                        Bank Operation Number:
+                                        <input class="form-control" type="text" @bind="newPayment.BankOperationNumber" />
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-6">
+                                        Transfer Date:
+                                        <input class="form-control" type="datetime" @bind="newPayment.TransferDate" />
+                                    </div>
+                                    <div class="col-6">
+                                        Transfer Received Date:
+                                        <input class="form-control" type="datetime" @bind="newPayment.TransferReceivedDate" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row m-1">
+                                <div class="col-6">
+                                    <button class="btn btn-warning" style="width:100%" @onclick="ClosePopups">Back</button>
+                                </div>
+                                <div class="col-6">
+                                    <button class="btn btn-success" type="submit" style="width:100%">Submit</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </EditForm>
+    }
+}
+
+@code {
+    [Parameter]
+    public string OrderId { get; set; }
+
+    List<Payment> payments;
+    Payment currentPayment;
+    Payment newPayment;
+    Order order;
+    AuthenticationState authstate;
+    bool showDetailsPopup = false;
+    bool showAddPaymentPopup = false;
+
+    protected override void OnInitialized()
+    {
+        Task.Run(async () => authstate = await authenticationStateProvider.GetAuthenticationStateAsync()).Wait();
+        if (authstate.User.Identity.IsAuthenticated)
+        {
+            if (int.TryParse(OrderId, out int orderId))
+            {
+                Order tempOrder = orderService.GetOrder(orderId);
+                if (tempOrder != null && tempOrder.UserId == userManager.GetUserId(authstate.User))
+                {
+                    order = tempOrder;
+                    payments = Service.GetPayments(order.OrderId);
+                    if (order.OrderStatus == OrderStatus.partlyPaid || order.OrderStatus == OrderStatus.placed)
+                    {
+                        newPayment = new Payment();
+
+                        //Temporary solution for presentation purposes
+                        newPayment.TransferReceivedDate = DateTime.Now;
+                        newPayment.TransferDate = DateTime.Now.AddDays(-1);
+                    }
+                }
+            }
+        }
+    }
+
+    private void NavigateToOrder()
+    {
+        navigationManager.NavigateTo("/OrderListPage/" + order.OrderId);
+    }
+
+    private void ShowDetailsPopup(Payment payment)
+    {
+        currentPayment = payment;
+        showDetailsPopup = true;
+    }
+
+    private void ShowAddPaymentPopup()
+    {
+        showAddPaymentPopup = true;
+    }
+
+    private void ClosePopups()
+    {
+        showDetailsPopup = false;
+        showAddPaymentPopup = false;
+    }
+
+    private void ValidSubmit()
+    {
+        Task.Run(async () => authstate = await authenticationStateProvider.GetAuthenticationStateAsync()).Wait();
+        if (authstate.User.Identity.IsAuthenticated)
+        {
+            newPayment.PaymentId = 0;
+            newPayment.OrderId = order.OrderId;
+
+            order = Service.CreatePayment(newPayment);
+            if (order != null)
+            {
+                showAddPaymentPopup = false;
+                payments = Service.GetPayments(order.OrderId);
+                if (order.OrderStatus == OrderStatus.partlyPaid || order.OrderStatus == OrderStatus.placed)
+                {
+                    newPayment = new Payment();
+
+                    //Temporary solution for presentation purposes
+                    newPayment.TransferReceivedDate = DateTime.Now;
+                    newPayment.TransferDate = DateTime.Now.AddDays(-1);
+                }
+            }
+        }
+    }
+}

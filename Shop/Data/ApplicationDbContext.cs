@@ -15,14 +15,6 @@ namespace Shop.Data
         {
         }
 
-        //protected override void OnModelCreating(ModelBuilder modelBuilder)
-        //{
-        //    modelBuilder.Entity<CustomField>()
-        //        .HasRequired(c => c.Category)
-        //        .WithMany()
-        //        .WillCascadeOnDelete(false);
-        //}
-
         public DbSet<Category> Categories { get; set; }
         public DbSet<CustomField> CustomFields { get; set; }
         public DbSet<DropDownItem> DropDownItems { get; set; }
@@ -37,5 +29,6 @@ namespace Shop.Data
         public DbSet<CartEntry> CartEntries { get; set; }
         public DbSet<Address> Addresses { get; set; }
         public DbSet<Order> Orders { get; set; }
+        public DbSet<Payment> Payments { get; set; }
     }
 }

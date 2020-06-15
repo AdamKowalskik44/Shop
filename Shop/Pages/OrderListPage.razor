@@ -1,10 +1,8 @@
-﻿@page "/ManageOrderListPage"
+﻿@page "/OrderListPage"
+@page "/OrderListPage/{OrderId}"
 @using Shop.Data
-@using Shop.Data.ProductTypes
-@using Shop.Data.Enums
 @using Shop.Services
 @using Microsoft.AspNetCore.Identity
-@using System.Text
 @inject CartService cartService
 @inject AddressService addressService
 @inject AuthenticationStateProvider authenticationStateProvider
@@ -131,6 +129,9 @@ else
 }
 
 @code {
+    [Parameter]
+    public string OrderId { get; set; }
+
     List<Order> activeOrders;
     List<Order> archiveOrders;
     AuthenticationState authstate;
@@ -145,6 +146,18 @@ else
         {
             activeOrders = Service.GetActiveOrders(userManager.GetUserId(authstate.User));
             archiveOrders = Service.GetArchiveOrders(userManager.GetUserId(authstate.User));
+            if (int.TryParse(OrderId, out int orderId))
+            {
+                Order tempOrder = activeOrders.FirstOrDefault(u => u.OrderId == orderId);
+                if (tempOrder == null)
+                {
+                    tempOrder = archiveOrders.FirstOrDefault(u => u.OrderId == orderId);
+                }
+                if (tempOrder != null)
+                {
+                    ShowDetails(tempOrder);
+                }
+            }
         }
     }
 

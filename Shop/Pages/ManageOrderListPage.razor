@@ -1,4 +1,4 @@
-﻿@page "/OrderListPage"
+﻿@page "/ManageOrderListPage"
 @using Shop.Data
 @using Shop.Data.Enums
 @using Shop.Services
@@ -206,7 +206,6 @@
     {
         IdentityUser user = new IdentityUser();
         Task.Run(async () => user = await userManager.FindByIdAsync(order.UserId)).Wait();
-        string result = user.Email;
-        return result;
+        return user.Email;
     }
 }
