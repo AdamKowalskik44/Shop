@@ -69,6 +69,30 @@
                                             <button class="btn btn-primary form-control" @onclick="ValidSubmit">Submit</button>
                                         </div>
                                     </div>
+                                    <div>
+                                        <div class="m-1">
+                                            Reset Password
+                                        </div>
+                                        <div class="row m-1">
+                                            <div class="col-6">
+                                                New Password:
+                                            </div>
+                                            <div class="col-6">
+                                                <input class="form-control" type="password" @bind="newPassword" />
+                                            </div>
+                                        </div>
+                                        <div class="row m-1">
+                                            <div class="col-6">
+                                                Confirm Password:
+                                            </div>
+                                            <div class="col-6">
+                                                <input class="form-control" type="password" @bind="newPasswordConfirm" />
+                                            </div>
+                                        </div>
+                                        <div class="m-1">
+                                            <button class="btn btn-primary form-control" style="width:100%" @onclick="ResetPassword">Reset</button>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -84,6 +108,8 @@
     IdentityUser currentUser;
     bool showPopup = false;
     string currentUserRole;
+    string newPassword;
+    string newPasswordConfirm;
 
     protected override void OnInitialized()
     {
@@ -120,6 +146,14 @@
         await GetUserRolesAsync();
         currentUser = null;
         showPopup = false;
+    }
+
+    private async void ResetPassword()
+    {
+        var code = await UserManager.GeneratePasswordResetTokenAsync(currentUser);
+        await UserManager.ResetPasswordAsync(currentUser, code, newPasswordConfirm);
+        newPassword = string.Empty;
+        newPasswordConfirm = string.Empty;
     }
 
     private void ClosePopup()
