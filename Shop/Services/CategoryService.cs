@@ -1,4 +1,5 @@
-﻿using Shop.Data;
+﻿using Microsoft.EntityFrameworkCore.Internal;
+using Shop.Data;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -135,6 +136,16 @@ namespace Shop.Services
                 }
             }
             return categories;
+        }
+
+        public bool HasChildCategories(int categoryId)
+        {
+            Category category = _db.Categories.FirstOrDefault(u => u.ParentCategoryId == categoryId);
+            if (category == null)
+            {
+                return false;
+            }
+            return true;
         }
     }
 }

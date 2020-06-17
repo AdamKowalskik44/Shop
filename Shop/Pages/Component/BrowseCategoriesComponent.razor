@@ -1,0 +1,86 @@
+﻿@using Shop.Services
+@using Shop.Data
+@inject NavigationManager navigationManager
+@inherits OwningComponentBase<CategoryService>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary" style="padding:4px; margin:4px; border-radius:4px">
+    <div class="collapse navbar-collapse" id="navbarColor01">
+        <ul class="navbar-nav mr-auto" style="justify-content: space-evenly;">
+            @foreach (var category in Categories)
+            {
+                <li class="nav-item active">
+                    <div class="row">
+                        <div class="col-6">
+                            <button class="btn btn-primary btn-sm" @onclick="() => NavigateToBrowseCategory(category.CategoryName)">@category.CategoryName</button>
+                        </div>
+                        @if (Service.HasChildCategories(category.CategoryId))
+                        {
+                            <div class="col-6">
+                                <button class="btn btn-primary btn-sm oi oi-expand-down" @onclick="() => ExpandCategories(category)"></button>
+                            </div>
+                        }
+                    </div>
+                </li>
+            }
+            @if (!rootComponent)
+            {
+                <li class="nav-item active">
+                    <button class="btn btn-primary btn-sm" @onclick="Collapse">X</button>
+                </li>
+            }
+        </ul>
+    </div>
+</nav>
+@if (expand)
+{
+    <BrowseCategoriesComponent Categories="expandedCategories" Collapse="CollapseCategories"></BrowseCategoriesComponent>
+}
+
+@code {
+    [Parameter]
+    public List<Category> Categories
+    {
+        get
+        {
+            return _categories;
+        }
+        set
+        {
+            _categories = value;
+            expand = false;
+        }
+    }
+
+    [Parameter]
+    public EventCallback Collapse { get; set; }
+    List<Category> _categories;
+    List<Category> expandedCategories;
+    bool expand;
+    bool rootComponent;
+
+    protected override void OnInitialized()
+    {
+        if (Categories == null)
+        {
+            Categories = Service.GetRootCategories();
+            rootComponent = true;
+        }
+    }
+
+    private void ExpandCategories(Category category)
+    {
+        expand = true;
+        expandedCategories = Service.GetCategories(category.CategoryId);
+    }
+
+    private void CollapseCategories()
+    {
+        expand = false;
+        expandedCategories = null;
+    }
+
+    private void NavigateToBrowseCategory(string category)
+    {
+        navigationManager.NavigateTo("/Browse/Category/" + category);
+    }
+}
