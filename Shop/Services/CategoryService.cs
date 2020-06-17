@@ -25,11 +25,11 @@ namespace Shop.Services
         {
             List<Category> categories = _db.Categories.ToList();
             List<Category> result = new List<Category>();
-            foreach (var item in categories)
+            foreach (var category in categories)
             {
-                if (item.ParentCategoryId != 0 && item.ParentCategoryId == parentCategoryId)
+                if (category.ParentCategoryId != 0 && category.ParentCategoryId == parentCategoryId)
                 {
-                    result.Add(item);
+                    result.Add(category);
                 }
             }
             return result;
@@ -46,6 +46,22 @@ namespace Shop.Services
                     result.Add(item);
                 }
             }
+            return result;
+        }
+
+        public List<Category> GetCategoriesInheritenceDown(Category category)
+        {
+            List<Category> categories = GetCategories(category.CategoryId);
+            List<Category> result = new List<Category>();
+            foreach (var cat in categories)
+            {
+                List<Category> cats = GetCategoriesInheritenceDown(cat);
+                foreach (var item in cats)
+                {
+                    result.Add(item);
+                }
+            }
+            result.Add(category);
             return result;
         }
 

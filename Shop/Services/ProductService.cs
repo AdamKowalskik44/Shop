@@ -113,6 +113,26 @@ namespace Shop.Services
             return result;
         }
 
+        public List<ProductDTO> GetCategoryProductDTOsWithInheritanceDown(Category category)
+        {
+            List<Product> products = GetProducts();
+            List<ProductDTO> result = new List<ProductDTO>();
+            List<Category> categories = categoryService.GetCategoriesInheritenceDown(category);
+
+            foreach (var product in products)
+            {
+                foreach (var cat in categories)
+                {
+                    if (product.CategoryId == cat.CategoryId)
+                    {
+                        result.Add(GetProductDTO(product));
+                        break;
+                    }
+                }
+            }
+            return result;
+        }
+
         public List<Product> GetProducts()
         {
             return _db.Products.ToList();
