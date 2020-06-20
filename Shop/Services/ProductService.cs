@@ -36,54 +36,57 @@ namespace Shop.Services
 
             //Find and attach all custom fields and their values
             List<CustomField> customFields = _db.CustomFields.ToList();
+            List<Category> categories = categoryService.GetCategoriesInheritenceUp(categoryService.GetCategory(result.Product.CategoryId));
             foreach (var customField in customFields)
             {
-                //TODO add category inheritance
-                if (customField.CategoryId == result.Product.CategoryId)
+                foreach (var category in categories)
                 {
-                    ProductFieldValue productFieldValue = _db.ProductFieldValues.FirstOrDefault
-                        (u => (u.CustomFieldId == customField.CustomFieldId && u.ProductId == result.Product.ProductId));
-
-                    if (productFieldValue == null)
+                    if (customField.CategoryId == category.CategoryId)
                     {
-                        switch (customField.FieldType)
-                        {
-                            case CustomFieldType.tf:
-                                productFieldValue = new ProductFieldValueBool();
-                                break;
-                            case CustomFieldType.integer:
-                                productFieldValue = new ProductFieldValueInt();
-                                break;
-                            case CustomFieldType.floating:
-                                productFieldValue = new ProductFieldValueFloat();
-                                break;
-                            case CustomFieldType.dropDown:
-                                productFieldValue = new ProductFieldValueDDI();
-                                break;
-                            case CustomFieldType.word:
-                                productFieldValue = new ProductFieldValueString();
-                                break;
-                            default:
-                                break;
-                        }
-                    }
+                        ProductFieldValue productFieldValue = _db.ProductFieldValues.FirstOrDefault
+                            (u => (u.CustomFieldId == customField.CustomFieldId && u.ProductId == result.Product.ProductId));
 
-                    if (customField.FieldType == CustomFieldType.dropDown)
-                    {
-                        CustomFieldDTO customFieldDTO = new CustomFieldDTO(customField);
-                        List<DropDownItem> dropDownItems = _db.DropDownItems.ToList();
-                        foreach (var dropDownItem in dropDownItems)
+                        if (productFieldValue == null)
                         {
-                            if (dropDownItem.CustomFieldId == customField.CustomFieldId)
+                            switch (customField.FieldType)
                             {
-                                customFieldDTO.DropDownItems.Add(dropDownItem);
+                                case CustomFieldType.tf:
+                                    productFieldValue = new ProductFieldValueBool();
+                                    break;
+                                case CustomFieldType.integer:
+                                    productFieldValue = new ProductFieldValueInt();
+                                    break;
+                                case CustomFieldType.floating:
+                                    productFieldValue = new ProductFieldValueFloat();
+                                    break;
+                                case CustomFieldType.dropDown:
+                                    productFieldValue = new ProductFieldValueDDI();
+                                    break;
+                                case CustomFieldType.word:
+                                    productFieldValue = new ProductFieldValueString();
+                                    break;
+                                default:
+                                    break;
                             }
                         }
-                        result.Fields.Add(customFieldDTO, productFieldValue);
-                    }
-                    else
-                    {
-                        result.Fields.Add(customField, productFieldValue);
+
+                        if (customField.FieldType == CustomFieldType.dropDown)
+                        {
+                            CustomFieldDTO customFieldDTO = new CustomFieldDTO(customField);
+                            List<DropDownItem> dropDownItems = _db.DropDownItems.ToList();
+                            foreach (var dropDownItem in dropDownItems)
+                            {
+                                if (dropDownItem.CustomFieldId == customField.CustomFieldId)
+                                {
+                                    customFieldDTO.DropDownItems.Add(dropDownItem);
+                                }
+                            }
+                            result.Fields.Add(customFieldDTO, productFieldValue);
+                        }
+                        else
+                        {
+                            result.Fields.Add(customField, productFieldValue);
+                        }
                     }
                 }
             }
@@ -311,42 +314,45 @@ namespace Shop.Services
             result.Product.CategoryId = categoryId;
             result.CategoryPath = categoryService.GetCategoryPath(result.Product.CategoryId, result.CategoryPath);
 
+            List<Category> categories = categoryService.GetCategoriesInheritenceUp(categoryService.GetCategory(result.Product.CategoryId));
             List<CustomField> customFields = _db.CustomFields.ToList();
             foreach (var customField in customFields)
             {
-                //TODO add category inheritance
-                if (customField.CategoryId == result.Product.CategoryId)
+                foreach (var category in categories)
                 {
-                    switch (customField.FieldType)
+                    if (customField.CategoryId == category.CategoryId)
                     {
-                        case CustomFieldType.tf:
-                            result.Fields.Add(customField, new ProductFieldValueBool());
-                            break;
-                        case CustomFieldType.integer:
-                            result.Fields.Add(customField, new ProductFieldValueInt());
-                            break;
-                        case CustomFieldType.floating:
-                            result.Fields.Add(customField, new ProductFieldValueFloat());
-                            break;
-                        case CustomFieldType.dropDown:
-                            {
-                                CustomFieldDTO customFieldDTO = new CustomFieldDTO(customField);
-                                List<DropDownItem> dropDownItems = _db.DropDownItems.ToList();
-                                foreach (var dropDownItem in dropDownItems)
-                                {
-                                    if (dropDownItem.CustomFieldId == customField.CustomFieldId)
-                                    {
-                                        customFieldDTO.DropDownItems.Add(dropDownItem);
-                                    }
-                                }
-                                result.Fields.Add(customFieldDTO, new ProductFieldValueDDI());
+                        switch (customField.FieldType)
+                        {
+                            case CustomFieldType.tf:
+                                result.Fields.Add(customField, new ProductFieldValueBool());
                                 break;
-                            }
-                        case CustomFieldType.word:
-                            result.Fields.Add(customField, new ProductFieldValueString());
-                            break;
-                        default:
-                            break;
+                            case CustomFieldType.integer:
+                                result.Fields.Add(customField, new ProductFieldValueInt());
+                                break;
+                            case CustomFieldType.floating:
+                                result.Fields.Add(customField, new ProductFieldValueFloat());
+                                break;
+                            case CustomFieldType.dropDown:
+                                {
+                                    CustomFieldDTO customFieldDTO = new CustomFieldDTO(customField);
+                                    List<DropDownItem> dropDownItems = _db.DropDownItems.ToList();
+                                    foreach (var dropDownItem in dropDownItems)
+                                    {
+                                        if (dropDownItem.CustomFieldId == customField.CustomFieldId)
+                                        {
+                                            customFieldDTO.DropDownItems.Add(dropDownItem);
+                                        }
+                                    }
+                                    result.Fields.Add(customFieldDTO, new ProductFieldValueDDI());
+                                    break;
+                                }
+                            case CustomFieldType.word:
+                                result.Fields.Add(customField, new ProductFieldValueString());
+                                break;
+                            default:
+                                break;
+                        }
                     }
                 }
             }

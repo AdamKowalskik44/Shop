@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Shop.Data.ProductTypes;
+using Shop.Helpers;
 
 namespace Shop.Data.ProductTypes
 {
@@ -34,6 +35,46 @@ namespace Shop.Data.ProductTypes
                 }
             }
             return null;
+        }
+
+        public string GetProductFieldValue(ProductFieldValue pfv)
+        {
+            switch (pfv)
+            {
+                case ProductFieldValueBool productFieldValue:
+                    if(productFieldValue.Value)
+                    {
+                        return "yes";   
+                    }
+                    else
+                    {
+                        return "no";
+                    }
+                case ProductFieldValueInt productFieldValue:
+                    return productFieldValue.Value.ToString();
+                case ProductFieldValueFloat productFieldValue:
+                    return productFieldValue.Value.ToString();
+                case ProductFieldValueString productFieldValue:
+                    if (productFieldValue.Value == null)
+                    {
+                        return string.Empty;
+                    }
+                    else
+                    {
+                        return productFieldValue.Value.ToString();
+                    }
+                case ProductFieldValueDDI productFieldValue:
+                    if (productFieldValue.Value == null)
+                    {
+                        return string.Empty;
+                    }
+                    else
+                    {
+                        return productFieldValue.Value.ToString();
+                    }
+                default:
+                    return string.Empty;
+            }
         }
     }
 }

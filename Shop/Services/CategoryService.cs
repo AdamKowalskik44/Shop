@@ -65,6 +65,22 @@ namespace Shop.Services
             return result;
         }
 
+        public List<Category> GetCategoriesInheritenceUp(Category category)
+        {
+            List<Category> result;
+            Category categoryToAdd = GetCategory(category.ParentCategoryId);
+            if (categoryToAdd != null)
+            {
+                result = GetCategoriesInheritenceUp(categoryToAdd);
+            }
+            else
+            {
+                result = new List<Category>();
+            }
+            result.Add(category);
+            return result;
+        }
+
         public Category GetCategory(int categoryId)
         {
             Category category = new Category();

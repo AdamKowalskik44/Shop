@@ -3,35 +3,42 @@
 @using Shop.Data.ProductTypes
 @using Shop.Services
 @using Shop.Pages.Component
+@using Shop.Helpers
 @inject CategoryService categoryService
 @inherits OwningComponentBase<ProductService>
 
 <BrowseCategoriesComponent></BrowseCategoriesComponent>
 
-<div style="margin-top:50px">
-    @if (products.Count == 0)
-    {
-        <h4>Sorry, no products of this category found :(</h4>
-    }
-    else
-    {
-        <div class="container" style="margin-top:50px">
-            <div class="row">
-                <div class="col-2" style="float:right">
-                    <h3>filters</h3>
-                </div>
-                <div class="col-8">
-                    @foreach (var product in products)
+<div style="margin-top:50px; margin:4px">
+    <div style="margin-top:50px">
+        <div class="row">
+            <div class="col-2">
+                @if (category != null)
+                {
+                    <FilterComponent Products="products" Category="category" FilteredProducts="FilterProducts"></FilterComponent>
+                }
+            </div>
+            <div class="col-8">
+                @if (filteredProducts == null || filteredProducts.Count == 0 || !showProducts)
+                {
+                    <h4>Sorry, no products of this category found :(</h4>
+                }
+                else
+                {
+                    @foreach (var product in filteredProducts)
                     {
-                    <Shop.Pages.Component.CompactProductDisplayComponent Product="product"></Shop.Pages.Component.CompactProductDisplayComponent>
+                        if (product.Value)
+                        {
+                            <CompactProductDisplayComponent Product="product.Key"></CompactProductDisplayComponent>
+                        }
                     }
-                </div>
-                <div class="col-2" style="float:right">
-                    <h3>ads</h3>
-                </div>
+                }
+            </div>
+            <div class="col-2" style="float:right">
+                <h3>ads</h3>
             </div>
         </div>
-    }
+    </div>
 </div>
 
 @code {
@@ -40,6 +47,8 @@
 
     Category category;
     List<ProductDTO> products;
+    Dictionary<ProductDTO, bool> filteredProducts;
+    bool showProducts = false;
 
     protected override void OnInitialized()
     {
@@ -56,5 +65,11 @@
     protected override void OnParametersSet()
     {
         OnInitialized();
+    }
+
+    private void FilterProducts(Dictionary<ProductDTO, bool> filteredProducts)
+    {
+        this.filteredProducts = filteredProducts;
+        showProducts = true;
     }
 }

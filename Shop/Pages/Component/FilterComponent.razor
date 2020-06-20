@@ -1,0 +1,143 @@
+﻿@using Shop.Data.ProductTypes
+@using Shop.Helpers
+@using Shop.Data 
+
+<div>
+    <div class="row" style="margin-bottom:30px">
+        <div class="col-6">
+            <button class="btn btn-primary" @onclick="FilterProducts">Apply Filters</button>
+        </div>
+        <div class="col-6">
+            <button class="btn btn-primary" @onclick="ClearFilters">Clear Filters</button>
+        </div>
+    </div>
+    @foreach (var filter in filters)
+    {
+        <div class="m-1">
+            @switch (filter)
+            {
+                case BoolFilter boolFilter:
+                    <h7>@boolFilter.CustomField.CustomFieldName:</h7>
+                    <div class="form-group">
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="@boolFilter.CustomField.CustomFieldId 1" @bind="boolFilter.TrueValue">
+                            <label class="custom-control-label" for="@boolFilter.CustomField.CustomFieldId 1"> Yes</label>
+                        </div>
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="@boolFilter.CustomField.CustomFieldId 2" @bind="boolFilter.FalseValue">
+                            <label class="custom-control-label" for="@boolFilter.CustomField.CustomFieldId 2"> No</label>
+                        </div>
+                    </div>
+                    break;
+                case StringFilter stringFilter:
+                    <h7>@stringFilter.CustomField.CustomFieldName:</h7>
+                    <div class="form-group">
+                        @foreach (var value in stringFilter.AvalibleValues)
+                        {
+                            <div class="custom-control custom-checkbox">
+                                <input type="checkbox" class="custom-control-input" id="@stringFilter.CustomField.CustomFieldId @value" @onclick="() => StringFilterSelectionChanged(stringFilter, value)">
+                                <label class="custom-control-label" for="@stringFilter.CustomField.CustomFieldId @value"> @value</label>
+                            </div>
+                        }
+                    </div>
+                    break;
+                case IntFilter intFilter:
+                    <h7>@intFilter.CustomField.CustomFieldName:</h7>
+                    <div class="form-group row">
+                        <input class="form-control col" type="number" min="@intFilter.MinAvalibleIntValue" max="@intFilter.MaxAvalibleIntValue" @bind="intFilter.MinIntValue" />
+                        <p style="margin-left:5px; margin-right:5px"> - </p>
+                        <input class="form-control col" type="number" min="@intFilter.MinAvalibleIntValue" max="@intFilter.MaxAvalibleIntValue" @bind="intFilter.MaxIntValue" />
+                    </div>
+                    break;
+                case FloatFilter floatFilter:
+                    <h7>@floatFilter.CustomField.CustomFieldName:</h7>
+                    <div class="form-group row">
+                        <input class="form-control col" type="number" min="@floatFilter.MinAvalibleFloatValue" max="@floatFilter.MaxAvalibleFloatValue" @bind="floatFilter.MinFloatValue" />
+                        <p style="margin-left:5px; margin-right:5px"> - </p>
+                        <input class="form-control col" type="number" min="@floatFilter.MinAvalibleFloatValue" max="@floatFilter.MaxAvalibleFloatValue" @bind="floatFilter.MaxFloatValue" />
+                    </div>
+                    break;
+                case PriceFilter priceFilter:
+                    <h7>Price:</h7>
+                    <div class="form-group row">
+                        <input class="form-control col" type="number" min="@priceFilter.MinAvaliblePrice" max="@priceFilter.MaxAvaliblePrice" @bind="priceFilter.MinPrice" />
+                        <p style="margin-left:5px; margin-right:5px"> - </p>
+                        <input class="form-control col" type="number" min="@priceFilter.MinAvaliblePrice" max="@priceFilter.MaxAvaliblePrice" @bind="priceFilter.MaxPrice" />
+                    </div>
+                    break;
+                default:
+                    break;
+            }
+        </div>
+    }
+</div>
+@code {
+    [Parameter]
+    public List<ProductDTO> Products { get; set; }
+
+    List<ProductDTO> _products;
+
+    [Parameter]
+    public EventCallback<Dictionary<ProductDTO, bool>> FilteredProducts { get; set; }
+
+    [Parameter]
+    public Category Category
+    {
+        set
+        {
+            if (_category != null && _category.CategoryId != value.CategoryId)
+            {
+                BuildFilters();
+                FilterProducts();
+            }
+            _category = value;
+        }
+    }
+
+    Category _category;
+
+    private List<IFilter> filters;
+    FilterBuilder fb = new FilterBuilder();
+
+    protected override void OnInitialized()
+    {
+        BuildFilters();
+        FilterProducts();
+    }
+
+    private void BuildFilters()
+    {
+        filters = fb.BuildFilters(Products);
+    }
+
+    private void FilterProducts()
+    {
+        FilteredProducts.InvokeAsync(fb.FilterProductDTOs(Products, filters));
+    }
+
+    private void ClearFilters()
+    {
+        filters = fb.BuildFilters(Products);
+        FilterProducts();
+    }
+
+    private void StringFilterSelectionChanged(StringFilter stringFilter, string selectedValue)
+    {
+        bool toAdd = true;
+        foreach (var filteredValue in stringFilter.FilteredValues)
+        {
+            if (filteredValue == selectedValue)
+            {
+                toAdd = false;
+            }
+        }
+        if (toAdd)
+        {
+            stringFilter.FilteredValues.Add(selectedValue);
+        }
+        else
+        {
+            stringFilter.FilteredValues.Remove(selectedValue);
+        }
+    }
+}
