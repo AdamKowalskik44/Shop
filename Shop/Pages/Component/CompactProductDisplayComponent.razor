@@ -10,24 +10,32 @@
 @inject IToastService toastService
 
 <div class="row p-1 m-1 border row">
-    <div class="col-3" style="padding-left: 0px;">
+    <div class="col-3" style="padding-left: 0px; padding-right:0px">
         @if (Product.GetMainPhoto() != null)
         {
             <ImageDisplay Image="Product.GetMainPhoto().Image" Width="150"></ImageDisplay>
         }
     </div>
     <div class="d-flex align-items-start flex-column col-9">
-        <div class="mb-auto p-2 container row">
-            <div class="col">
-                <h3 class="btn" style="color:#78C2AD" @onclick="NavigateToProduct">@Product.Product.ProductName</h3>
+        <div class="mb-auto p-2 container row" style="padding-left:0px">
+            <div class="col float-left">
+                <h3 class="btn" style="color:#78C2AD; position:absolute; top:0; left:0; padding:0" @onclick="NavigateToProduct">@Product.Product.ProductName</h3>
+                <h7 style="color:#78C2AD; position:absolute; bottom:0; left:0">@Product.Product.Price</h7>
             </div>
             <div class="col float-right">
-                <button class="m-1 btn btn-primary float-right" style="width:150px" @onclick="() => AddToCart()">Add to cart</button>
-                <input class="form-control m-1 float-right" style="width:150px" type="number" min="1" max=@Product.Product.Stock @bind="cartQuantity">
+                @if(Product.Product.Stock > 0)
+                {
+                    <button class="m-1 btn btn-primary float-right" style="width:150px" @onclick="() => AddToCart()">Add to cart</button>
+                    <input class="form-control m-1 float-right" style="width:150px" type="number" min="1" max=@Product.Product.Stock @bind="cartQuantity">
+                    
+                }
+                else
+                {
+                    <button class="m-1 btn btn-primary disabled float-right" style="width:150px">Add to cart</button>
+                    <input class="form-control m-1 float-right disabled" style="width:150px" type="number" min="0" max="0">
+                }
+                <p class="float-right m-1">On stock: @Product.Product.Stock</p>
             </div>
-        </div>
-        <div class="p-2">
-            <h7 style="color:#78C2AD">@Product.Product.Price</h7>
         </div>
     </div>
 </div>

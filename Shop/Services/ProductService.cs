@@ -386,5 +386,42 @@ namespace Shop.Services
             }
             return true;
         }
+
+        public bool SubstractStockValues(Dictionary<ProductDTO, CartEntry> products)
+        {
+            foreach (var product in products)
+            {
+                if (product.Value.Quantity <= product.Key.Product.Stock)
+                {
+                    SubstractStockValue(product.Key.Product, product.Value.Quantity);
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            _db.SaveChanges();
+            return true;
+        }
+
+        /// <summary>
+        /// No database update - intentional
+        /// </summary>
+        /// <param name="product">product to alter</param>
+        /// <param name="value">value to substract</param>
+        /// <returns></returns>
+        private bool SubstractStockValue(Product product, int value)
+        {
+            Product existingProduct = _db.Products.FirstOrDefault(u => u.ProductId == product.ProductId);
+            if (existingProduct != null)
+            {
+                existingProduct.Stock -= value;
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
     }
 }

@@ -1,15 +1,17 @@
 ﻿@page "/AddressPage"
 @using Shop.Data
 @using Shop.Data.ProductTypes
-@using Shop.Data.Enums 
+@using Shop.Data.Enums
 @using Shop.Services
 @using Microsoft.AspNetCore.Identity
 @using System.Text
 @inject CartService cartService
+@inject ProductService productService
 @inject OrderService orderService
 @inject AuthenticationStateProvider authenticationStateProvider
 @inject NavigationManager navigationManager
 @inject UserManager<IdentityUser> userManager
+@inject IToastService toastService
 @inherits OwningComponentBase<AddressService>
 
 @if (isCartEmpty)
@@ -116,9 +118,12 @@ else
                         <h5>Products:</h5>
                         @foreach (var product in products)
                         {
-                            <p>
-                                @product.Key.Product.ProductName x @product.Value.Quantity (Total: @(product.Key.Product.Price * product.Value.Quantity))
-                            </p>
+                            if (product.Value.Quantity > 0)
+                            {
+                                <p>
+                                    @product.Key.Product.ProductName x @product.Value.Quantity (Total: @(product.Key.Product.Price * product.Value.Quantity))
+                                </p>
+                            }
                         }
                         <br />
                         <p>Total: @CalculateTotal()</p>
@@ -196,37 +201,52 @@ else
 
     private void PlaceOrder()
     {
-        Task.Run(async () => authstate = await authenticationStateProvider.GetAuthenticationStateAsync()).Wait();
-        if (authstate.User.Identity.IsAuthenticated)
+        if (CheckIfValid())
         {
-            Order newOrder = new Order();
-            newOrder.OrderId = 0;
-            newOrder.TotalAmount = CalculateTotal();
-            newOrder.AmountPaid = 0;
-            newOrder.isPaid = false;
-            newOrder.ProductListHTML = BuildProductListHTML();
-            newOrder.UserId = userManager.GetUserId(authstate.User);
-            newOrder.OrderStatus = OrderStatus.placed;
-
-            Order order = orderService.CreateOrder(newOrder);
-            if (order != null)
+            Task.Run(async () => authstate = await authenticationStateProvider.GetAuthenticationStateAsync()).Wait();
+            if (authstate.User.Identity.IsAuthenticated)
             {
-                address.AddressId = 0;
-                address.OrderId = order.OrderId;
-                if (address.CurrentAddress)
+                Order newOrder = new Order();
+                newOrder.OrderId = 0;
+                newOrder.TotalAmount = CalculateTotal();
+                newOrder.AmountPaid = 0;
+                newOrder.isPaid = false;
+                newOrder.ProductListHTML = BuildProductListHTML();
+                newOrder.UserId = userManager.GetUserId(authstate.User);
+                newOrder.OrderStatus = OrderStatus.placed;
+
+                if (productService.SubstractStockValues(products))
                 {
-                    address.UserId = userManager.GetUserId(authstate.User);
-                }
-                bool success = Service.CreateAddress(address);
-                if (success)
-                {
-                    foreach (var product in products)
+                    Order order = orderService.CreateOrder(newOrder);
+                    if (order != null)
                     {
-                        cartService.DeleteCartEntry(product.Value);
+                        address.AddressId = 0;
+                        address.OrderId = order.OrderId;
+                        if (address.CurrentAddress)
+                        {
+                            address.UserId = userManager.GetUserId(authstate.User);
+                        }
+                        bool success = Service.CreateAddress(address);
+                        if (success)
+                        {
+                            foreach (var product in products)
+                            {
+                                cartService.DeleteCartEntry(product.Value);
+                            }
+                            navigationManager.NavigateTo("/PaymentPage/" + order.OrderId);
+                        }
                     }
-                    navigationManager.NavigateTo("/PaymentPage/" + order.OrderId);
                 }
+                else
+                {
+                    toastService.ShowWarning("We had trouble placing Your order. Please check Your cart");
+                }
+
             }
+        }
+        else
+        {
+            toastService.ShowWarning("Some of Your cart entries exceed what we have on stock");
         }
     }
 
@@ -246,37 +266,52 @@ else
 
         foreach (var product in products)
         {
-            sb.Append(product.Key.Product.ProductName + " x " + product.Value.Quantity + "<br />");
-            sb.Append("&emsp;Price per unit: " + product.Key.Product.Price + "<br />");
-            sb.Append("&emsp;Price total: " + (product.Key.Product.Price * product.Value.Quantity) + "<br />");
-            sb.Append("&emsp;Description: " + product.Key.Product.ProducDescription + "<br />");
-            foreach (var customField in product.Key.Fields)
+            if (product.Value.Quantity > 0)
             {
-                sb.Append("&emsp;" + customField.Key.CustomFieldName + ": ");
-                switch (customField.Value)
+                sb.Append(product.Key.Product.ProductName + " x " + product.Value.Quantity + "<br />");
+                sb.Append("&emsp;Price per unit: " + product.Key.Product.Price + "<br />");
+                sb.Append("&emsp;Price total: " + (product.Key.Product.Price * product.Value.Quantity) + "<br />");
+                sb.Append("&emsp;Description: " + product.Key.Product.ProducDescription + "<br />");
+                foreach (var customField in product.Key.Fields)
                 {
-                    case ProductFieldValueBool productFieldValue:
-                        sb.Append(productFieldValue.Value);
-                        break;
-                    case ProductFieldValueInt productFieldValue:
-                        sb.Append(productFieldValue.Value);
-                        break;
-                    case ProductFieldValueFloat productFieldValue:
-                        sb.Append(productFieldValue.Value);
-                        break;
-                    case ProductFieldValueString productFieldValue:
-                        sb.Append(productFieldValue.Value);
-                        break;
-                    case ProductFieldValueDDI productFieldValue:
-                        sb.Append(productFieldValue.Value);
-                        break;
+                    sb.Append("&emsp;" + customField.Key.CustomFieldName + ": ");
+                    switch (customField.Value)
+                    {
+                        case ProductFieldValueBool productFieldValue:
+                            sb.Append(productFieldValue.Value);
+                            break;
+                        case ProductFieldValueInt productFieldValue:
+                            sb.Append(productFieldValue.Value);
+                            break;
+                        case ProductFieldValueFloat productFieldValue:
+                            sb.Append(productFieldValue.Value);
+                            break;
+                        case ProductFieldValueString productFieldValue:
+                            sb.Append(productFieldValue.Value);
+                            break;
+                        case ProductFieldValueDDI productFieldValue:
+                            sb.Append(productFieldValue.Value);
+                            break;
+                    }
+                    sb.Append("<br />");
                 }
-                sb.Append("<br />");
-
             }
             sb.Append("<br />");
         }
 
         return sb.ToString();
     }
+
+    private bool CheckIfValid()
+    {
+        foreach (var product in products)
+        {
+            if (product.Key.Product.Stock < product.Value.Quantity)
+            {
+                return false;
+            }
+        }
+        return true;
+    }
 }
+

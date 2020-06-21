@@ -65,14 +65,7 @@
                             <td>@getUserName(order)</td>
                             <td>@order.OrderStatus.ToString()</td>
                             <td>
-                                <div class="row">
-                                    <div class="col-6">
-                                        <button class="btn btn-primary" style="width:100px" @onclick="() => ShowDetails(order)">Show Details</button>
-                                    </div>
-                                    <div class="col-6">
-                                        <button class="btn btn-primary" style="width:100px" @onclick="() => ChangeStatus(order)">Change Status</button>
-                                    </div>
-                                </div>
+                                <button class="btn btn-primary" style="width:100px" @onclick="() => ShowDetails(order)">Show Details</button>
                             </td>
                         </tr>
                     }
@@ -124,10 +117,20 @@
                                 </div>
                                 <div class="col-8" style="margin:10px">
                                     <select @bind="@currentOrder.OrderStatus" class="form-control">
-                                        @foreach (OrderStatus orderStatus in Enum.GetValues(typeof(OrderStatus)))
+                                        @*@foreach (OrderStatus orderStatus in Enum.GetValues(typeof(OrderStatus)))*@
+                                        @if (currentOrder.isPaid)
                                         {
-                                            <option class="dropdown-item" value="@orderStatus">@orderStatus</option>
+                                            <option class="dropdown-item" value="@OrderStatus.paid">@OrderStatus.paid.ToString()</option>
+                                            <option class="dropdown-item" value="@OrderStatus.sent">@OrderStatus.sent.ToString()</option>
                                         }
+                                        @if (currentOrder.AmountPaid > 0 && currentOrder.AmountPaid < currentOrder.TotalAmount)
+                                        {
+                                            <option class="dropdown-item" value="@OrderStatus.partlyPaid">@OrderStatus.partlyPaid.ToString()</option>
+                                        }
+                                        @if (currentOrder.AmountPaid == 0)
+	                                    {
+                                            <option class="dropdown-item" value="@OrderStatus.placed">@OrderStatus.placed.ToString()</option>
+	                                    }
                                     </select>
                                 </div>
                             </div>

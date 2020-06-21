@@ -14,17 +14,24 @@
 <div class="container">
     <div class="row">
         <div class="col-2" style="float:right">
-            <h3>filters</h3>
+            <h7>Current total: @currentTotal</h7>
         </div>
         <div class="col-8 row container">
-            @foreach (var product in Products)
+            @if (Products.Count == 0)
             {
-                <div class="col-11">
-                    <CartProductComponent ProductDTO="product.Key" CartEntry="product.Value"></CartProductComponent>
-                </div>
-                <div class="col-1">
-                    <button class="btn btn-link" @onclick="() => DeleteCartEntry(product.Value)">X</button>
-                </div>
+                <h4>Your cart is empty :(</h4>
+            }
+            else
+            {
+                foreach (var product in Products)
+                {
+                    <div class="col-11">
+                        <CartProductComponent ProductDTO="product.Key" CartEntry="product.Value"></CartProductComponent>
+                    </div>
+                    <div class="col-1">
+                        <button class="btn btn-link" @onclick="() => DeleteCartEntry(product.Value)">X</button>
+                    </div>
+                }
             }
         </div>
         <div class="col-2" style="float:right">
@@ -37,6 +44,7 @@
 @code {
     AuthenticationState authstate;
     Dictionary<ProductDTO, CartEntry> Products;
+    float currentTotal;
 
     protected override void OnInitialized()
     {
@@ -44,6 +52,7 @@
         if (authstate.User.Identity.IsAuthenticated)
         {
             Products = Service.GetUserCartProducts(UserManager.GetUserId(authstate.User));
+            currentTotal = CalculateTotal();
         }
     }
 
@@ -68,14 +77,21 @@
     {
         if (authstate.User.Identity.IsAuthenticated)
         {
-            bool result = Service.SaveCart(Products.Values.ToList());
-            if (result)
+            if (CheckIfValid())
             {
-                toastService.ShowSuccess("Changes saved");
+                bool result = Service.SaveCart(Products.Values.ToList());
+                if (result)
+                {
+                    toastService.ShowSuccess("Changes saved");
+                }
+                else
+                {
+                    toastService.ShowWarning("We encountered a problem saving Your cart");
+                }
             }
             else
             {
-                toastService.ShowWarning("We encountered a problem saving Your cart");
+                toastService.ShowWarning("Some of Your cart entries exceed what we have on stock");
             }
         }
 
@@ -83,6 +99,35 @@
 
     private void GoToCheckout()
     {
-        navigationManager.NavigateTo("/AddressPage");
+        if (CheckIfValid())
+        {
+            navigationManager.NavigateTo("/AddressPage");
+        }
+        else
+        {
+            toastService.ShowWarning("Some of Your cart entries exceed what we have on stock");
+        }
+    }
+
+    private bool CheckIfValid()
+    {
+        foreach (var product in Products)
+        {
+            if (product.Key.Product.Stock < product.Value.Quantity)
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private float CalculateTotal()
+    {
+        currentTotal = 0;
+        foreach (var product in Products)
+        {
+            currentTotal += product.Key.Product.Price * product.Value.Quantity;
+        }
+        return currentTotal;
     }
 }
