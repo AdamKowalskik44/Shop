@@ -1,14 +1,45 @@
-﻿<AuthorizeView>
-    <Authorized>
-        <a href="CartPage">Your Cart</a>
-        <a href="OrderListPage">Your Orders</a>
-        <a href="Identity/Account/Manage">Hello, @context.User.Identity.Name!</a>
-        <form method="post" action="Identity/Account/LogOut">
-            <button type="submit" class="nav-link btn btn-link">Log out</button>
+﻿@using Shop.Services; 
+@using Microsoft.AspNetCore.Identity;
+@inject CartService cartService;
+@inject AuthenticationStateProvider authenticationStateProvider;
+@inject UserManager<IdentityUser> userManager;
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary top-row" style="width:100%; z-index:1">
+    <a class="navbar-brand" href="/">Shop</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarColor01" aria-controls="navbarColor01" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarColor01">
+        <form class="form-inline">
+            <input class="form-control mr-sm-2" type="text" placeholder="Search">
+            <button class="btn btn-secondary my-2 my-sm-0" type="submit">Search</button>
         </form>
-    </Authorized>
-    <NotAuthorized>
-        <a href="Identity/Account/Register">Register</a>
-        <a href="Identity/Account/Login">Log in</a>
-    </NotAuthorized>
-</AuthorizeView>
+        <ul class="navbar-nav ml-auto">
+            <AuthorizeView>
+                <Authorized>
+                    <li class="nav-item">
+                        <a class="nav-link" href="CartPage">Your Cart</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="OrderListPage">Your Orders</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="Identity/Account/Manage">Hello, @context.User.Identity.Name!</a>
+                    </li>
+                    <form method="post" action="Identity/Account/LogOut">
+                        <button type="submit" class="nav-link btn btn-link">Log out</button>
+                    </form>
+                </Authorized>
+                <NotAuthorized>
+                    <li class="nav-item">
+                        <a class="nav-link" href="Identity/Account/Register">Register</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="Identity/Account/Login">Log in</a>
+                    </li>
+                </NotAuthorized>
+            </AuthorizeView>
+        </ul>
+    </div>
+</nav>

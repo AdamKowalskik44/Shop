@@ -116,5 +116,19 @@ namespace Shop.Services
             }
             return true;
         }
+
+        public int GetCartQuantity(string userId)
+        {
+            List<CartEntry> cartEntries = _db.CartEntries.ToList();
+            List<CartEntry> result = new List<CartEntry>();
+            foreach (var item in cartEntries)
+            {
+                if (item.UserId == userId)
+                {
+                    result.Add(item);
+                }
+            }
+            return result.Count();
+        }
     }
 }

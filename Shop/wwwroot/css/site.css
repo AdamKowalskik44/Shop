@@ -174,4 +174,11 @@ app {
         /* Never collapse the sidebar for wide screens */
         display: block;
     }
+
+    .navbar-brand.abs {
+        position: absolute;
+        width: 100%;
+        left: 0;
+        text-align: center;
+    }
 }

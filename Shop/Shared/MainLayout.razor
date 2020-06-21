@@ -1,7 +1,9 @@
 ﻿@inherits LayoutComponentBase
-@using Microsoft.AspNetCore.Authorization
 
-<BlazoredToasts />
+<div style="z-index:2">
+    <BlazoredToasts />
+</div>
+
 
 <AuthorizeView Roles="admin, moderator">
     <Authorized>
@@ -13,10 +15,7 @@
 </AuthorizeView>
 
 <div class="main">
-    <div class="top-row px-4 auth">
-        <LoginDisplay />
-        <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
-    </div>
+    <LoginDisplay />
 
     <div class="content px-4">
         @Body

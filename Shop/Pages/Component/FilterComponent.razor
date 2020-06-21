@@ -30,16 +30,19 @@
                     </div>
                     break;
                 case StringFilter stringFilter:
-                    <h7>@stringFilter.CustomField.CustomFieldName:</h7>
-                    <div class="form-group">
-                        @foreach (var value in stringFilter.AvalibleValues)
-                        {
-                            <div class="custom-control custom-checkbox">
-                                <input type="checkbox" class="custom-control-input" id="@stringFilter.CustomField.CustomFieldId @value" @onclick="() => StringFilterSelectionChanged(stringFilter, value)">
-                                <label class="custom-control-label" for="@stringFilter.CustomField.CustomFieldId @value"> @value</label>
-                            </div>
-                        }
-                    </div>
+                    @if (stringFilter.AvalibleValues.Count > 0)
+                    {
+                        <h7>@stringFilter.CustomField.CustomFieldName:</h7>
+                        <div class="form-group">
+                            @foreach (var value in stringFilter.AvalibleValues)
+                            {
+                                <div class="custom-control custom-checkbox">
+                                    <input type="checkbox" class="custom-control-input" id="@stringFilter.CustomField.CustomFieldId @value" @onclick="() => StringFilterSelectionChanged(stringFilter, value)">
+                                    <label class="custom-control-label" for="@stringFilter.CustomField.CustomFieldId @value"> @value</label>
+                                </div>
+                            }
+                        </div>
+                    }
                     break;
                 case IntFilter intFilter:
                     <h7>@intFilter.CustomField.CustomFieldName:</h7>

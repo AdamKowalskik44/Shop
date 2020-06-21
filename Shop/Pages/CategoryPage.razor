@@ -28,9 +28,9 @@
             else
             {
                 <div class="custom-control custom-switch">
-                    <a style="margin-right:40px">List View</a>
+                    <a style="margin-right:40px">Tree View</a>
                     <input type="checkbox" class="custom-control-input" id="customSwitch1" @onclick="ToggleTreeView" />
-                    <label class="custom-control-label" for="customSwitch1">Tree View</label>
+                    <label class="custom-control-label" for="customSwitch1">List View</label>
                     <br>
                 </div>
                 if (showTree)
@@ -140,7 +140,7 @@
     Category currentCategory;
 
     //false = show list, true = show tree
-    bool showTree = false;
+    bool showTree = true;
     bool showPopup = false;
     bool showPopupWarning = false;
     string warningMessage = "";

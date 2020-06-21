@@ -24,12 +24,15 @@ namespace Shop.Helpers
         {
             foreach (var value in AvalibleValues)
             {
-                if (value == newValue)
+                if (value == newValue || newValue == string.Empty)
                 {
                     return;
                 }
             }
-            AvalibleValues.Add(newValue);
+            if (newValue != string.Empty)
+            {
+                AvalibleValues.Add(newValue);
+            }
         }
     }
 }
