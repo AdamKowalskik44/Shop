@@ -5,6 +5,7 @@
 @using Microsoft.AspNetCore.Identity;
 @inherits OwningComponentBase<ProductService>
 @inject CartService cartService
+@inject CategoryService categoryService
 @inject NavigationManager navigationManager
 @inject AuthenticationStateProvider authenticationStateProvider
 @inject UserManager<IdentityUser> UserManager
@@ -140,7 +141,7 @@ else
 
     private void NavigateToBrowseCategory(string category)
     {
-        navigationManager.NavigateTo("/Browse/Category/" + category);
+        navigationManager.NavigateTo("/Browse/Category/" + categoryService.GetCategoryId(category));
     }
 
     private async void AddToCart()

@@ -4,6 +4,7 @@
 @using Shop.Services;
 @using Shop.Data.CustomFieldTypes
 @using Shop.Pages;
+@using Shop.Pages.Component
 @inherits OwningComponentBase<CustomFieldService>
 @inject NavigationManager NavigationManager
 @inject CategoryService categoryService
@@ -88,11 +89,11 @@
             }
             @if (showPopup)
             {
-                <Shop.Pages.Component.DropDownItemComponent CurrentCustomField="@currentCustomField"
+                <DropDownItemComponent CurrentCustomField="@currentCustomField"
                                                             Close="ClosePopup"
                                                             Submit="ValidSubmit"
                                                             Categories="categories">
-                </Shop.Pages.Component.DropDownItemComponent>
+                </DropDownItemComponent>
             }
         </div>
     </Authorized>

@@ -21,6 +21,19 @@ namespace Shop.Services
             return _db.Categories.ToList();
         }
 
+        public int GetCategoryId(string categoryName)
+        {
+            Category category = _db.Categories.FirstOrDefault(u => u.CategoryName == categoryName);
+            if (category != null)
+            {
+                return category.CategoryId;
+            }
+            else
+            {
+                return 0;
+            }
+        }
+
         public List<Category> GetCategories(int parentCategoryId)
         {
             List<Category> categories = _db.Categories.ToList();

@@ -23,18 +23,22 @@ namespace Shop.Data
         public string Street { get; set; }
 
         [Required]
+        [Range(0, 999999999, ErrorMessage = "Number is invalid")]
         public string Number { get; set; }
 
+        [Range(0, 999999999, ErrorMessage = "Number is invalid")]
         public string Number2 { get; set; }
 
         [Required]
         public string City { get; set; }
 
         [Required]
-        [StringLength(5, MinimumLength = 5, ErrorMessage = "Postal Code must be 5 characters")]
+        [Range(0, 99999, ErrorMessage = "Postal code is invalid")]
         public string PostalCode { get; set; }
 
         [Required]
+        [Range(100000000, 999999999,
+        ErrorMessage = "Number must be 9 digits.")]
         public string PhoneNumber { get; set; }
 
         public bool CurrentAddress { get; set; }
