@@ -31,7 +31,7 @@
                 </div>
             </div>
 
-            <EditForm Model="@productDTO" OnValidSubmit="@ValidSubmit">
+            <EditForm Model="@productDTO.Product" OnValidSubmit="@ValidSubmit">
                 <ValidationSummary></ValidationSummary>
                 <div class="container">
                     <div class="row m-2 p-2 border">
@@ -168,7 +168,7 @@
                                         <input class="form-control" type="text" @bind="@productFieldValue.Value" />
                                         break;
                                     case ProductFieldValueDDI productFieldValue:
-                                        <select @bind="productFieldValue.Value" class="form-control">
+                                        <select @bind="productFieldValue.Value" class="form-control" required="">
                                             @if (true)
                                             {
                                                 CustomFieldDTO customFieldDto = (CustomFieldDTO)item.Key;
@@ -224,31 +224,37 @@
     private void ValidSubmit()
     {
         bool result;
-        if (productDTO.Product.ProductId > 0)
+        if(Validate())
         {
-            result = Service.UpdateProduct(productDTO);
-            if (result)
+            if (productDTO.Product.ProductId > 0)
             {
-                toastService.ShowSuccess("Product " + productDTO.Product.ProductName + " succesfully updated");
+                result = Service.UpdateProduct(productDTO);
+                if (result)
+                {
+                    toastService.ShowSuccess("Product " + productDTO.Product.ProductName + " succesfully updated");
+                }
+                else
+                {
+                    toastService.ShowWarning("A problem occured while updating " + productDTO.Product.ProductName + " to Product Library");
+                }
             }
             else
             {
-                toastService.ShowWarning("A problem occured while updating " + productDTO.Product.ProductName + " to Product Library");
+                result = Service.CreateProduct(productDTO);
+                if (result)
+                {
+                    toastService.ShowSuccess("Product " + productDTO.Product.ProductName + " added to Product Library");
+                }
+                else
+                {
+                    toastService.ShowWarning("A problem occured while adding " + productDTO.Product.ProductName + " to Product Library");
+                }
             }
         }
         else
         {
-            result = Service.CreateProduct(productDTO);
-            if (result)
-            {
-                toastService.ShowSuccess("Product " + productDTO.Product.ProductName + " added to Product Library");
-            }
-            else
-            {
-                toastService.ShowWarning("A problem occured while adding " + productDTO.Product.ProductName + " to Product Library");
-            }
+            toastService.ShowWarning("Not all fields are propertly filled.");
         }
-
     }
 
     private void AddPhoto(byte[] image)
@@ -294,5 +300,45 @@
     private void NavigateToProductList()
     {
         navigationManager.NavigateTo("/ProductList");
+    }
+
+    private bool Validate()
+    {
+        if (productDTO.Product.ProductName == null || productDTO.Product.ProductName == string.Empty)
+        {
+            return false;
+        }
+        else if(productDTO.Product.ProducDescription == null || productDTO.Product.ProducDescription == string.Empty)
+        {
+            return false;
+        }
+        else if (productDTO.Product.Price <= 0)
+        {
+            return false;
+        }
+        else if (productDTO.Product.Stock <= 0)
+        {
+            return false;
+        }
+        else
+        {
+            foreach (var field in productDTO.Fields)
+            {
+
+                if(productDTO.GetProductFieldValue(field.Value) == null || productDTO.GetProductFieldValue(field.Value) == string.Empty)
+                {
+                    if(field.Value is ProductFieldValueDDI pfv)
+                    {
+                        CustomFieldDTO cf = (CustomFieldDTO)field.Key;
+                        pfv.Value = cf.DropDownItems[0].DropDownItemName;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
     }
 }

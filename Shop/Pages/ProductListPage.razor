@@ -132,7 +132,10 @@
 
     private void CreateProduct()
     {
-        NavigationManager.NavigateTo("/Product/" + "0" + "/" + newProductCategoryId);
+        if (newProductCategoryId != 0)
+        {
+            NavigationManager.NavigateTo("/Product/" + "0" + "/" + newProductCategoryId);
+        }
     }
 
     private void EditProduct(Product product)

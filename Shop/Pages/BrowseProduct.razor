@@ -45,15 +45,18 @@ else
             </div>
         </div>
 
-        <div class="m-2 p-2 ">
-            <div class="container row d-flex justify-content-center " style="position: center">
-                <button class="btn btn-secondary p-2 m-2 oi oi-arrow-left" style="width:100px" @onclick="() => ChangeActivePhoto(false)"></button>
-                <div class="m-2 p-2">
-                    <Shop.Pages.Component.ImageDisplay Image="photos[activePhoto].Image" Width="500"></Shop.Pages.Component.ImageDisplay>
+        @if (photos != null && photos.Length != 0)
+        {
+            <div class="m-2 p-2 ">
+                <div class="container row d-flex justify-content-center " style="position: center">
+                    <button class="btn btn-secondary p-2 m-2 oi oi-arrow-left" style="width:100px" @onclick="() => ChangeActivePhoto(false)"></button>
+                    <div class="m-2 p-2">
+                        <Shop.Pages.Component.ImageDisplay Image="photos[activePhoto].Image" Width="500"></Shop.Pages.Component.ImageDisplay>
+                    </div>
+                    <button class="btn btn-secondary p-2 m-2 oi oi-arrow-right" style="width:100px" @onclick="() => ChangeActivePhoto(true)"></button>
                 </div>
-                <button class="btn btn-secondary p-2 m-2 oi oi-arrow-right" style="width:100px" @onclick="() => ChangeActivePhoto(true)"></button>
             </div>
-        </div>
+        }
 
         @foreach (var item in productDTO.Fields)
         {
