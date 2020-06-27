@@ -34,11 +34,11 @@
                     {
                         <h7>@stringFilter.CustomField.CustomFieldName:</h7>
                         <div class="form-group">
-                            @foreach (var value in stringFilter.AvalibleValues)
+                            @foreach (var avalibleValue in stringFilter.AvalibleValues.Keys)
                             {
                                 <div class="custom-control custom-checkbox">
-                                    <input type="checkbox" class="custom-control-input" id="@stringFilter.CustomField.CustomFieldId @value" @onclick="() => StringFilterSelectionChanged(stringFilter, value)">
-                                    <label class="custom-control-label" for="@stringFilter.CustomField.CustomFieldId @value"> @value</label>
+                                    <input type="checkbox" class="custom-control-input" id="@stringFilter.CustomField.CustomFieldId @avalibleValue" @bind="stringFilter.AvalibleValues[avalibleValue]">
+                                    <label class="custom-control-label" for="@stringFilter.CustomField.CustomFieldId @avalibleValue"> @avalibleValue</label>
                                 </div>
                             }
                         </div>
@@ -124,23 +124,23 @@
         FilterProducts();
     }
 
-    private void StringFilterSelectionChanged(StringFilter stringFilter, string selectedValue)
-    {
-        bool toAdd = true;
-        foreach (var filteredValue in stringFilter.FilteredValues)
-        {
-            if (filteredValue == selectedValue)
-            {
-                toAdd = false;
-            }
-        }
-        if (toAdd)
-        {
-            stringFilter.FilteredValues.Add(selectedValue);
-        }
-        else
-        {
-            stringFilter.FilteredValues.Remove(selectedValue);
-        }
-    }
+    //private void StringFilterSelectionChanged(StringFilter stringFilter, string selectedValue)
+    //{
+    //    bool toAdd = true;
+    //    foreach (var filteredValue in stringFilter.FilteredValues)
+    //    {
+    //        if (filteredValue == selectedValue)
+    //        {
+    //            toAdd = false;
+    //        }
+    //    }
+    //    if (toAdd)
+    //    {
+    //        stringFilter.FilteredValues.Add(selectedValue);
+    //    }
+    //    else
+    //    {
+    //        stringFilter.FilteredValues.Remove(selectedValue);
+    //    }
+    //}
 }

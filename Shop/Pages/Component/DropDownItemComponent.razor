@@ -1,6 +1,7 @@
 ﻿@using Shop.Data
 @using Shop.Services
 @using Shop.Data.CustomFieldTypes
+@inject IToastService toastService
 @inherits OwningComponentBase<DropDownItemService>
 
 <AuthorizeView Roles="admin" Context="auth">
@@ -9,7 +10,7 @@
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h3>@(CurrentCustomField.CategoryId != 0 ? "Update" : "Create")</h3>
+                        <h3>@(CurrentCustomField.CustomFieldId != 0 ? "Update custom field" : "Create custom field")</h3>
                         <button type="button" class="close" @onclick="Close">
                             <span aria-hidden="true">X</span>
                         </button>
@@ -128,33 +129,78 @@
 
     private void ValidSubmit()
     {
-        foreach (var dropDownItem in dropDownItems)
+        if (Validate())
         {
-            SaveItem(dropDownItem);
+            if (CurrentCustomField.FieldType == CustomFieldType.dropDown && dropDownItems.Count < 2)
+            {
+                toastService.ShowWarning("There needs to be at least two drop down items");
+            }
+            else
+            {
+                if (CurrentCustomField.CustomFieldId != 0)
+                {
+                    foreach (var dropDownItem in dropDownItems)
+                    {
+                        SaveItem(dropDownItem);
+                    }
+                    Submit.InvokeAsync(CurrentCustomField);
+                }
+                else if (CurrentCustomField.FieldType == CustomFieldType.dropDown)
+                {
+                    CustomFieldDTO cfDTO = new CustomFieldDTO(CurrentCustomField);
+                    foreach (var dropDownItem in dropDownItems)
+                    {
+                        cfDTO.DropDownItems.Add(dropDownItem);
+                    }
+                    Submit.InvokeAsync(cfDTO);
+                }
+                else
+                {
+                    Submit.InvokeAsync(CurrentCustomField);
+                }
+            }
         }
-        Submit.InvokeAsync(CurrentCustomField);
+        else
+        {
+            toastService.ShowWarning("Fill in all the values");
+        }
     }
 
     private void SaveItem(DropDownItem dropDownItem)
     {
-        var result = false;
-
-        if (dropDownItem.DropDownItemName != null && dropDownItem.DropDownItemName != "")
+        if (dropDownItem.DropDownItemName != null && dropDownItem.DropDownItemName != string.Empty)
         {
-            if (dropDownItem.DropDownItemId > 0)
+            if (CurrentCustomField.CustomFieldId != 0)
             {
-                result = Service.UpdateDropDownItem(dropDownItem);
+                if (dropDownItem.DropDownItemName != null && dropDownItem.DropDownItemName != "")
+                {
+                    if (dropDownItem.DropDownItemId > 0)
+                    {
+                        Service.UpdateDropDownItem(dropDownItem);
+                    }
+                    else
+                    {
+                        Service.CreateDropDownItem(dropDownItem);
+                    }
+                }
+
+                dropDownItems = Service.GetDropDownItems(CurrentCustomField.CustomFieldId);
+                currentDropDownItem = new DropDownItem();
+                currentDropDownItem.DropDownItemId = 0;
+                currentDropDownItem.CustomFieldId = CurrentCustomField.CustomFieldId;
             }
             else
             {
-                result = Service.CreateDropDownItem(dropDownItem);
+                dropDownItems.Add(dropDownItem);
+                currentDropDownItem = new DropDownItem();
+                currentDropDownItem.DropDownItemId = 0;
+                currentDropDownItem.CustomFieldId = CurrentCustomField.CustomFieldId;
             }
         }
-
-        dropDownItems = Service.GetDropDownItems(CurrentCustomField.CustomFieldId);
-        currentDropDownItem = new DropDownItem();
-        currentDropDownItem.DropDownItemId = 0;
-        currentDropDownItem.CustomFieldId = CurrentCustomField.CustomFieldId;
+        else
+        {
+            toastService.ShowWarning("Value cannot be empty.");
+        }
     }
 
     private void DeleteItem(DropDownItem dropDownItem)
@@ -162,5 +208,21 @@
         var result = false;
         result = Service.DeleteDropDownItem(dropDownItem);
         dropDownItems = Service.GetDropDownItems(CurrentCustomField.CustomFieldId);
+    }
+
+    private bool Validate()
+    {
+        if (CurrentCustomField.CategoryId == 0)
+        {
+            return false;
+        }
+        else if (CurrentCustomField.CustomFieldName == null || CurrentCustomField.CustomFieldName == string.Empty)
+        {
+            return false;
+        }
+        else
+        {
+            return true;
+        }
     }
 }

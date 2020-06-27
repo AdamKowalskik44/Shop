@@ -11,10 +11,12 @@ namespace Shop.Services
     public class CustomFieldService
     {
         private readonly ApplicationDbContext _db;
+        private readonly DropDownItemService dropDownItemService;
 
         public CustomFieldService(ApplicationDbContext db)
         {
             _db = db;
+            dropDownItemService = new DropDownItemService(_db);
         }
 
         /// <summary>
@@ -57,6 +59,14 @@ namespace Shop.Services
             {
                 _db.CustomFields.Add(customField);
                 _db.SaveChanges();
+                if (customField is CustomFieldDTO customFieldDTO)
+                {
+                    foreach (var dropDownItem in customFieldDTO.DropDownItems)
+                    {
+                        dropDownItem.CustomFieldId = customField.CustomFieldId;
+                        dropDownItemService.CreateDropDownItem(dropDownItem);
+                    }
+                }
             }
             catch (Exception)
             {

@@ -3,6 +3,7 @@
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject UserManager<IdentityUser> UserManager
 @inject RoleManager<IdentityRole> RoleManager
+@inject IToastService toastService
 
 <AuthorizeView Roles="admin">
     <Authorized>
@@ -69,11 +70,8 @@
                                             <button class="btn btn-primary form-control" @onclick="ValidSubmit">Submit</button>
                                         </div>
                                     </div>
-                                    <div>
-                                        <div class="m-1">
-                                            Reset Password
-                                        </div>
-                                        <div class="row m-1">
+                                    <div style="margin-top:50px">
+                                        <div class="row py-2">
                                             <div class="col-6">
                                                 New Password:
                                             </div>
@@ -81,7 +79,7 @@
                                                 <input class="form-control" type="password" @bind="newPassword" />
                                             </div>
                                         </div>
-                                        <div class="row m-1">
+                                        <div class="row py-2">
                                             <div class="col-6">
                                                 Confirm Password:
                                             </div>
@@ -89,8 +87,13 @@
                                                 <input class="form-control" type="password" @bind="newPasswordConfirm" />
                                             </div>
                                         </div>
-                                        <div class="m-1">
-                                            <button class="btn btn-primary form-control" style="width:100%" @onclick="ResetPassword">Reset</button>
+                                        <div class="py-2 row">
+                                            <div class="col-6">
+
+                                            </div>
+                                            <div class="col-6">
+                                                <button class="btn btn-primary form-control" style="width:100%" @onclick="ResetPassword">Reset password</button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -137,27 +140,62 @@
 
     private async void ValidSubmit()
     {
-        await UserManager.RemoveFromRoleAsync(currentUser, "admin");
-        await UserManager.RemoveFromRoleAsync(currentUser, "moderator");
-        if (currentUserRole == "admin" || currentUserRole == "moderator")
+        if (currentUserRole == null || currentUserRole == string.Empty)
         {
-            await UserManager.AddToRoleAsync(currentUser, currentUserRole);
+            toastService.ShowWarning("Choose a role");
         }
-        await GetUserRolesAsync();
-        currentUser = null;
-        showPopup = false;
+        else
+        {
+            try
+            {
+                await UserManager.RemoveFromRoleAsync(currentUser, "admin");
+                await UserManager.RemoveFromRoleAsync(currentUser, "moderator");
+                if (currentUserRole == "admin" || currentUserRole == "moderator")
+                {
+                    await UserManager.AddToRoleAsync(currentUser, currentUserRole);
+                }
+                await GetUserRolesAsync();
+                toastService.ShowSuccess("Role updated");
+            }
+            catch (Exception)
+            {
+                toastService.ShowWarning("We encountered a problem updating user role");
+            }
+        }
     }
 
     private async void ResetPassword()
     {
-        var code = await UserManager.GeneratePasswordResetTokenAsync(currentUser);
-        await UserManager.ResetPasswordAsync(currentUser, code, newPasswordConfirm);
-        newPassword = string.Empty;
-        newPasswordConfirm = string.Empty;
+        if (newPassword != null && newPassword != string.Empty && newPasswordConfirm != null && newPasswordConfirm != string.Empty)
+        {
+            var passwordValidator = new PasswordValidator<IdentityUser>();
+            var result = await passwordValidator.ValidateAsync(UserManager, null, newPasswordConfirm);
+            if (newPassword == newPasswordConfirm && result.Succeeded)
+            {
+                try
+                {
+                    var code = await UserManager.GeneratePasswordResetTokenAsync(currentUser);
+                    await UserManager.ResetPasswordAsync(currentUser, code, newPasswordConfirm);
+                    newPassword = string.Empty;
+                    newPasswordConfirm = string.Empty;
+                    toastService.ShowSuccess("Password updated");
+                }
+                catch (Exception e)
+                {
+                    toastService.ShowWarning("We encountered a problem updating the password: " + e.Message);
+                }
+            }
+            else
+            {
+                toastService.ShowWarning("Passwords are not the same or they do not meet the requirements");
+            }
+        }
+
     }
 
     private void ClosePopup()
     {
+        currentUser = null;
         showPopup = false;
     }
 }

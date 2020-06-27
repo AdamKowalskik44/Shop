@@ -179,12 +179,13 @@ namespace Shop.Helpers
                                     return false;
                                 }
                             case StringFilter stringFilter:
-                                if (stringFilter.FilteredValues.Count == 0)
+                                List<string> filteredValues = GetAvalibleStringValues(stringFilter);
+                                if (filteredValues.Count == 0)
                                 {
                                     continue;
                                 }
                                 bool found = false;
-                                foreach (var filteredValue in stringFilter.FilteredValues)
+                                foreach (var filteredValue in filteredValues)
                                 {
                                     if (filteredValue == productDTO.GetProductFieldValue(productFieldValue))
                                     {
@@ -252,7 +253,7 @@ namespace Shop.Helpers
                         return true;
                     }
                 case StringFilter stringFilter:
-                    if (stringFilter.FilteredValues.Count == 0)
+                    if (GetAvalibleStringValues(stringFilter).Count == 0)
                     {
                         return false;
                     }
@@ -281,6 +282,19 @@ namespace Shop.Helpers
                 default:
                     return true;
             }
+        }
+
+        private List<string> GetAvalibleStringValues(StringFilter stringFilter)
+        {
+            List<string> filteredValues = new List<string>();
+            foreach (var value in stringFilter.AvalibleValues)
+            {
+                if (value.Value)
+                {
+                    filteredValues.Add(value.Key);
+                }
+            }
+            return filteredValues;
         }
 
         private ProductFieldValue ExtractCustomField(ProductDTO productDTO, IFilter filter)

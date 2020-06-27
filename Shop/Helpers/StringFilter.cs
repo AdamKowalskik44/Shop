@@ -11,27 +11,25 @@ namespace Shop.Helpers
     {
         public StringFilter(CustomField customField, string firstValue) : base(customField)
         {
-            AvalibleValues = new List<string>();
-            FilteredValues = new List<string>();
+            AvalibleValues = new Dictionary<string, bool>();
             AddAvalibleValue(firstValue);
         }
 
         //todo encapsulate
-        public List<string> AvalibleValues { get; set; }
-        public List<string> FilteredValues { get; set; }
+        public Dictionary<string, bool> AvalibleValues { get; set; }
 
         public void AddAvalibleValue(string newValue)
         {
             foreach (var value in AvalibleValues)
             {
-                if (value == newValue || newValue == string.Empty)
+                if (value.Key == newValue || newValue == string.Empty)
                 {
                     return;
                 }
             }
             if (newValue != string.Empty)
             {
-                AvalibleValues.Add(newValue);
+                AvalibleValues.Add(newValue, false);
             }
         }
     }
