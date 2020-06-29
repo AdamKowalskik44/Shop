@@ -423,5 +423,86 @@ namespace Shop.Services
                 return false;
             }
         }
+
+        public List<ProductDTO> SearchProductsByPhrase(string phrase)
+        {
+            List<ProductDTO> result = new List<ProductDTO>();
+
+            List<Product> products = _db.Products.ToList();
+            foreach (var product in products)
+            {
+                if (SearchForPhraseInProduct(product, phrase))
+                {
+                    result.Add(GetProductDTO(product));
+                }
+            }
+
+            List<ProductFieldValueString> productFieldValues = _db.ProductFieldValuesString.ToList();
+            foreach (var productFieldValue in productFieldValues)
+            {
+                if (SearchForPhraseInProductFieldValue(productFieldValue, phrase))
+                {
+                    ProductDTO product = GetProductDTO(productFieldValue.ProductId);
+                    bool found = false;
+                    foreach (var prod in result)
+                    {
+                        if (prod.Product.ProductId == product.Product.ProductId)
+                        {
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (!found)
+                    {
+                        result.Add(product);
+                    }
+                }
+            }
+
+            List<ProductFieldValueDDI> productFieldValuesDDI = _db.ProductFieldValuesDDI.ToList();
+            foreach (var productFieldValue in productFieldValuesDDI)
+            {
+                if (SearchForPhraseInProductFieldValue(productFieldValue, phrase))
+                {
+                    ProductDTO product = GetProductDTO(productFieldValue.ProductId);
+                    bool found = false;
+                    foreach (var prod in result)
+                    {
+                        if (prod.Product.ProductId == product.Product.ProductId)
+                        {
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (!found)
+                    {
+                        result.Add(product);
+                    }
+                }
+            }
+            return result;
+        }
+
+        private bool SearchForPhraseInProduct(Product product, string phrase)
+        {
+            if (product.ProductName.ToLower().Contains(phrase.ToLower()))
+            {
+                return true;
+            }
+            else if (product.ProducDescription.Contains(phrase))
+            {
+                return true;
+            }
+            return false;
+        }
+
+        private bool SearchForPhraseInProductFieldValue(ProductFieldValue productFieldValue, string phrase)
+        {
+            if (ProductDTO.GetProductFieldValue(productFieldValue).ToLower().Contains(phrase.ToLower()))
+            {
+                return true;
+            }
+            return false;
+        }
     }
 }

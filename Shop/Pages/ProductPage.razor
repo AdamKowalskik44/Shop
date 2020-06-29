@@ -325,7 +325,7 @@
             foreach (var field in productDTO.Fields)
             {
 
-                if(productDTO.GetProductFieldValue(field.Value) == null || productDTO.GetProductFieldValue(field.Value) == string.Empty)
+                if(ProductDTO.GetProductFieldValue(field.Value) == null || ProductDTO.GetProductFieldValue(field.Value) == string.Empty)
                 {
                     if(field.Value is ProductFieldValueDDI pfv)
                     {

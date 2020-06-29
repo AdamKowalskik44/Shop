@@ -19,7 +19,7 @@
     <div class="d-flex align-items-start flex-column col-9">
         <div class="mb-auto p-2 container row" style="padding-left:0px">
             <div class="col float-left">
-                <h3 class="btn" style="color:#78C2AD; position:absolute; top:0; left:0; padding:0" @onclick="NavigateToProduct">@Product.Product.ProductName</h3>
+                <a class="btn" style="color:#78C2AD; position:absolute; top:0; left:0; padding:0" href="/Browse/Product/@Product.Product.ProductId">@Product.Product.ProductName</a>
                 <h7 style="color:#78C2AD; position:absolute; bottom:0; left:0">@Product.Product.Price</h7>
             </div>
             <div class="col float-right">
@@ -74,8 +74,8 @@
         }
     }
 
-    private void NavigateToProduct()
-    {
-        navigationManager.NavigateTo("/Browse/Product/" + Product.Product.ProductId);
-    }
+    //private void NavigateToProduct()
+    //{
+    //    navigationManager.NavigateTo("/Browse/Product/" + Product.Product.ProductId);
+    //}
 }

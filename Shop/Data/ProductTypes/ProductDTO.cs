@@ -37,7 +37,7 @@ namespace Shop.Data.ProductTypes
             return null;
         }
 
-        public string GetProductFieldValue(ProductFieldValue pfv)
+        public static string GetProductFieldValue(ProductFieldValue pfv)
         {
             switch (pfv)
             {

@@ -39,11 +39,11 @@ namespace Shop.Helpers
                                 FloatFilter actualFilter = (FloatFilter)filter;
                                 if (productFieldValueFloat.Value > actualFilter.MaxAvalibleFloatValue)
                                 {
-                                    actualFilter.MaxAvalibleFloatValue = productFieldValueFloat.Value;
+                                    actualFilter.MaxAvalibleFloatValue = (float)Math.Round(productFieldValueFloat.Value, MidpointRounding.ToPositiveInfinity);
                                 }
                                 else if (productFieldValueFloat.Value < actualFilter.MinAvalibleFloatValue)
                                 {
-                                    actualFilter.MinAvalibleFloatValue = productFieldValueFloat.Value;
+                                    actualFilter.MinAvalibleFloatValue = (float)Math.Round(productFieldValueFloat.Value, MidpointRounding.ToNegativeInfinity);
                                 }
                             }
                             else if (field.Value is ProductFieldValueBool productFieldValueBool)
@@ -53,7 +53,7 @@ namespace Shop.Helpers
                             else
                             {
                                 StringFilter actualFilter = (StringFilter)filter;
-                                actualFilter.AddAvalibleValue(productDTO.GetProductFieldValue(field.Value));
+                                actualFilter.AddAvalibleValue(ProductDTO.GetProductFieldValue(field.Value));
                             }
                             found = true;
                             break;
@@ -75,10 +75,11 @@ namespace Shop.Helpers
                             },
                             ProductFieldValueFloat productFieldValue => new FloatFilter(field.Key)
                             {
-                                MaxAvalibleFloatValue = productFieldValue.Value,
-                                MinAvalibleFloatValue = productFieldValue.Value,
+                                MaxAvalibleFloatValue = (float)Math.Round(productFieldValue.Value, MidpointRounding.ToPositiveInfinity),
+                                MinAvalibleFloatValue = (float)Math.Round(productFieldValue.Value, MidpointRounding.ToNegativeInfinity)
+
                             },
-                            _ => new StringFilter(field.Key, productDTO.GetProductFieldValue(field.Value)),
+                            _ => new StringFilter(field.Key, ProductDTO.GetProductFieldValue(field.Value)),
                         };
                         filters.Add(filterToAdd);
                     }
@@ -108,19 +109,19 @@ namespace Shop.Helpers
             {
                 if (firstIteration)
                 {
-                    priceFilter.MaxAvaliblePrice = productDTO.Product.Price;
-                    priceFilter.MinAvaliblePrice = productDTO.Product.Price;
+                    priceFilter.MaxAvaliblePrice = (float)Math.Round(productDTO.Product.Price, MidpointRounding.ToPositiveInfinity);
+                    priceFilter.MinAvaliblePrice = (float)Math.Round(productDTO.Product.Price, MidpointRounding.ToNegativeInfinity);
                     firstIteration = false;
                 }
                 else
                 {
                     if (productDTO.Product.Price > priceFilter.MaxAvaliblePrice)
                     {
-                        priceFilter.MaxAvaliblePrice = productDTO.Product.Price;
+                        priceFilter.MaxAvaliblePrice = (float)Math.Round(productDTO.Product.Price, MidpointRounding.ToPositiveInfinity);
                     }
                     else if (productDTO.Product.Price < priceFilter.MinAvaliblePrice)
                     {
-                        priceFilter.MinAvaliblePrice = productDTO.Product.Price;
+                        priceFilter.MinAvaliblePrice = (float)Math.Round(productDTO.Product.Price, MidpointRounding.ToNegativeInfinity);
                     }
                 }
             }
@@ -187,7 +188,7 @@ namespace Shop.Helpers
                                 bool found = false;
                                 foreach (var filteredValue in filteredValues)
                                 {
-                                    if (filteredValue == productDTO.GetProductFieldValue(productFieldValue))
+                                    if (filteredValue == ProductDTO.GetProductFieldValue(productFieldValue))
                                     {
                                         found = true;
                                     }

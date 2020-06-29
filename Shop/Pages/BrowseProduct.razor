@@ -16,26 +16,27 @@
 }
 else
 {
-    <div class="container row">
-        <div class="col-8">
-            <h3>@productDTO.Product.ProductName</h3>
-            @foreach (var category in productDTO.CategoryPath)
-            {
-                <button type="button" class="btn btn-link" style="margin-left:0px; margin-right:0px; padding-left:0px; padding-right:0px" @onclick="() => NavigateToBrowseCategory(category)">\ @category</button>
-            }
-        </div>
-        <div class="col-2">
-            <h3 class="float-right">@productDTO.Product.Price $</h3>
-        </div>
-        <div class="col-2 float-right">
-            <form>
-                <button class="btn btn-primary m-1" style="width:150px" @onclick="AddToCart">Add to Cart</button>
-                <input class="m-1" style="width:150px" type="number" min="1" max=@productDTO.Product.Stock @bind="cartQuantity">
-            </form>
-        </div>
-    </div>
+    
 
     <div class="container">
+        <div class="container row">
+            <div class="col-8">
+                <h3>@productDTO.Product.ProductName</h3>
+                @foreach (var category in productDTO.CategoryPath)
+                {
+                    <button type="button" class="btn btn-link" style="margin-left:0px; margin-right:0px; padding-left:0px; padding-right:0px" @onclick="() => NavigateToBrowseCategory(category)">\ @category</button>
+                }
+            </div>
+            <div class="col-2">
+                <h3 class="float-right">@productDTO.Product.Price $</h3>
+            </div>
+            <div class="col-2 float-right">
+                <form>
+                    <button class="btn btn-primary m-1" style="width:150px" @onclick="AddToCart">Add to Cart</button>
+                    <input class="m-1" style="width:150px" type="number" min="1" max=@productDTO.Product.Stock @bind="cartQuantity">
+                </form>
+            </div>
+        </div>
         <div class="row m-2 p-2 border">
             <div class="col-3">
                 Description

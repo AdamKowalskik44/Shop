@@ -1,5 +1,6 @@
 ﻿@using Shop.Services; 
 @using Microsoft.AspNetCore.Identity;
+@inject NavigationManager navigationManager
 @inject CartService cartService;
 @inject AuthenticationStateProvider authenticationStateProvider;
 @inject UserManager<IdentityUser> userManager;
@@ -12,8 +13,8 @@
 
     <div class="collapse navbar-collapse" id="navbarColor01">
         <form class="form-inline">
-            <input class="form-control mr-sm-2" type="text" placeholder="Search">
-            <button class="btn btn-secondary my-2 my-sm-0" type="submit">Search</button>
+            <input class="form-control mr-sm-2" type="text" placeholder="Search" @bind="searchPhrase">
+            <button class="btn btn-secondary my-2 my-sm-0" @onclick="NavigateToSearchResults">Search</button>
         </form>
         <ul class="navbar-nav ml-auto">
             <AuthorizeView>
@@ -43,3 +44,15 @@
         </ul>
     </div>
 </nav>
+
+@code{
+    string searchPhrase;
+
+    private void NavigateToSearchResults()
+    {
+        if(searchPhrase != null && searchPhrase != string.Empty)
+        {
+            navigationManager.NavigateTo("/Browse/Category/0/" + searchPhrase, true);
+        }
+    }
+}

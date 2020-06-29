@@ -1,0 +1,163 @@
+﻿@page "/Browse/Category/{CategoryId}"
+@page "/Browse/Category/{CategoryId}/{SearchPhrase}"
+@using Shop.Data
+@using Shop.Data.ProductTypes
+@using Shop.Services
+@using Shop.Pages.Component
+@using Shop.Helpers
+@inject CategoryService categoryService
+@inherits OwningComponentBase<ProductService>
+
+<BrowseCategoriesComponent></BrowseCategoriesComponent>
+
+<div style="margin-top:50px; margin:4px">
+    <div style="margin-top:50px">
+        <div class="row">
+            <div class="col-2">
+                <div>
+                    <div class="row" style="margin-bottom:30px">
+                        <div class="col-6">
+                            <button class="btn btn-primary" @onclick="FilterProducts">Apply Filters</button>
+                        </div>
+                        <div class="col-6">
+                            <button class="btn btn-primary" @onclick="ClearFilters">Clear Filters</button>
+                        </div>
+                    </div>
+                    @foreach (var filter in filters)
+                    {
+                        <div class="m-1">
+                            @switch (filter)
+                            {
+                                case BoolFilter boolFilter:
+                                    <h7>@boolFilter.CustomField.CustomFieldName:</h7>
+                                    <div class="form-group">
+                                        <div class="custom-control custom-checkbox">
+                                            <input type="checkbox" class="custom-control-input" id="@boolFilter.CustomField.CustomFieldId 1" @bind="boolFilter.TrueValue">
+                                            <label class="custom-control-label" for="@boolFilter.CustomField.CustomFieldId 1"> Yes</label>
+                                        </div>
+                                        <div class="custom-control custom-checkbox">
+                                            <input type="checkbox" class="custom-control-input" id="@boolFilter.CustomField.CustomFieldId 2" @bind="boolFilter.FalseValue">
+                                            <label class="custom-control-label" for="@boolFilter.CustomField.CustomFieldId 2"> No</label>
+                                        </div>
+                                    </div>
+                                    break;
+                                case StringFilter stringFilter:
+                                    @if (stringFilter.AvalibleValues.Count > 0)
+                                    {
+                                        <h7>@stringFilter.CustomField.CustomFieldName:</h7>
+                                        <div class="form-group">
+                                            @foreach (var avalibleValue in stringFilter.AvalibleValues.Keys)
+                                            {
+                                                <div class="custom-control custom-checkbox">
+                                                    <input type="checkbox" class="custom-control-input" id="@stringFilter.CustomField.CustomFieldId @avalibleValue" @bind="stringFilter.AvalibleValues[avalibleValue]">
+                                                    <label class="custom-control-label" for="@stringFilter.CustomField.CustomFieldId @avalibleValue"> @avalibleValue</label>
+                                                </div>
+                                            }
+                                        </div>
+                                    }
+                                    break;
+                                case IntFilter intFilter:
+                                    <h7>@intFilter.CustomField.CustomFieldName:</h7>
+                                    <div class="form-group row">
+                                        <input class="form-control col" type="number" min="@intFilter.MinAvalibleIntValue" max="@intFilter.MaxAvalibleIntValue" @bind="intFilter.MinIntValue" />
+                                        <p style="margin-left:5px; margin-right:5px"> - </p>
+                                        <input class="form-control col" type="number" min="@intFilter.MinAvalibleIntValue" max="@intFilter.MaxAvalibleIntValue" @bind="intFilter.MaxIntValue" />
+                                    </div>
+                                    break;
+                                case FloatFilter floatFilter:
+                                    <h7>@floatFilter.CustomField.CustomFieldName:</h7>
+                                    <div class="form-group row">
+                                        <input class="form-control col" type="number" min="@floatFilter.MinAvalibleFloatValue" max="@floatFilter.MaxAvalibleFloatValue" @bind="floatFilter.MinFloatValue" />
+                                        <p style="margin-left:5px; margin-right:5px"> - </p>
+                                        <input class="form-control col" type="number" min="@floatFilter.MinAvalibleFloatValue" max="@floatFilter.MaxAvalibleFloatValue" @bind="floatFilter.MaxFloatValue" />
+                                    </div>
+                                    break;
+                                case PriceFilter priceFilter:
+                                    <h7>Price:</h7>
+                                    <div class="form-group row">
+                                        <input class="form-control col" type="number" min="@priceFilter.MinAvaliblePrice" max="@priceFilter.MaxAvaliblePrice" @bind="priceFilter.MinPrice" />
+                                        <p style="margin-left:5px; margin-right:5px"> - </p>
+                                        <input class="form-control col" type="number" min="@priceFilter.MinAvaliblePrice" max="@priceFilter.MaxAvaliblePrice" @bind="priceFilter.MaxPrice" />
+                                    </div>
+                                    break;
+                                default:
+                                    break;
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+            <div class="col-8">
+                @if (filteredProducts == null || filteredProducts.Count == 0)
+                {
+                    <h4>Sorry, no products found :(</h4>
+                }
+                else
+                {
+                    @foreach (var product in filteredProducts)
+                    {
+                        if (product.Value)
+                        {
+                            <CompactProductDisplayComponent Product="product.Key"></CompactProductDisplayComponent>
+                        }
+                    }
+                }
+            </div>
+            <div class="col-2" style="float:right">
+                <h3>stuff</h3>
+                <p style="color:red">This is a placeholder for client personalized content like ads, highlighted products or information</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public string CategoryId { get; set; }
+
+    [Parameter]
+    public string SearchPhrase { get; set; }
+
+    List<ProductDTO> products;
+    List<IFilter> filters;
+    Dictionary<ProductDTO, bool> filteredProducts;
+    FilterBuilder fb = new FilterBuilder();
+
+    protected override void OnParametersSet()
+    {
+        if (int.TryParse(CategoryId, out int categoryId))
+        {
+            if (categoryId != 0)
+            {
+                Category category = categoryService.GetCategory(categoryId);
+                if (category != null)
+                {
+                    products = Service.GetCategoryProductDTOsWithInheritanceDown(category);
+                }
+            }
+            else
+            {
+                products = Service.SearchProductsByPhrase(SearchPhrase);
+            }
+            filters = fb.BuildFilters(products);
+            BuildFilters();
+            FilterProducts();
+        }
+    }
+
+    private void FilterProducts()
+    {
+        filteredProducts = fb.FilterProductDTOs(products, filters);
+    }
+
+    private void BuildFilters()
+    {
+        filters = fb.BuildFilters(products);
+    }
+
+    private void ClearFilters()
+    {
+        BuildFilters();
+        FilterProducts();
+    }
+}
